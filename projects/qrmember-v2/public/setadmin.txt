@@ -1,0 +1,29 @@
+// Import the Firebase Admin SDK
+const admin = require('firebase-admin');
+
+// --- !! แก้ไขตรงนี้ !! ---
+const staffEmail = "kajorntriyut@gmail.com"; // <--- ใส่อีเมลของบัญชีพนักงานที่ต้องการให้สิทธิ์
+// -------------------------
+
+// Initialize the app with your project's credentials
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+});
+
+async function setStaffClaim() {
+  try {
+    // Find the user account by email
+    const user = await admin.auth().getUserByEmail(staffEmail);
+
+    // Set the custom claim { staff: true }
+    await admin.auth().setCustomUserClaims(user.uid, { staff: true });
+
+    console.log(`\n✅ สำเร็จ! มอบสิทธิ์พนักงานให้กับ ${staffEmail} เรียบร้อยแล้ว`);
+    console.log(`\n👉 กรุณา Logout แล้ว Login ใหม่ในหน้าเว็บของพนักงานเพื่อให้สิทธิ์มีผล\n`);
+  } catch (error) {
+    console.error('❌ เกิดข้อผิดพลาด:', error.message);
+  }
+  process.exit();
+}
+
+setStaffClaim();

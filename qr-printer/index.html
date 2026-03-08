@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Printer 🔴⚪</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* พิมพ์ A4 */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            html, body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            #print-area {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 5mm !important;
+                box-shadow: none !important;
+                display: grid !important;
+            }
+
+            .qr-box {
+                padding: 3mm !important;
+            }
+
+            .qr-box img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important;
+            }
+        }
+
+        #print-area {
+            width: 210mm;
+            height: 297mm;
+            background: white;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 5mm;
+            display: grid;
+            gap: 2mm;
+        }
+
+        .qr-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 4mm;
+            padding: 5mm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .qr-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- แผงควบคุม -->
+    <div class="no-print w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 mb-6 border-t-8 border-red-600">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">QR Printer 🔴⚪</h1>
+                <p class="text-sm text-gray-500">อัปโหลดรูป → พิมพ์ A4</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <!-- เลือกจำนวนรูป -->
+                <select id="image-count" class="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <option value="1">1 รูป</option>
+                    <option value="2">2 รูป</option>
+                    <option value="4">4 รูป</option>
+                    <option value="6">6 รูป</option>
+                    <option value="8">8 รูป</option>
+                    <option value="10">10 รูป</option>
+                    <option value="12">12 รูป</option>
+                </select>
+
+                <!-- เลือกแนว (สำหรับ 1 รูป) -->
+                <select id="orientation" class="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <option value="portrait">📐 แนวตั้ง</option>
+                    <option value="landscape">📐 แนวนอน</option>
+                </select>
+
+                <!-- ปุ่มอัปโหลด -->
+                <label for="file-upload" class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-xl text-center transition-all border-2 border-dashed border-gray-300">
+                    📂 อัปโหลดรูป
+                </label>
+                <input id="file-upload" type="file" class="hidden" accept="image/*" multiple>
+
+                <button onclick="handlePrint()" id="print-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-lg flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                    🖨️ พิมพ์
+                </button>
+            </div>
+        </div>
+
+        <div id="upload-hint" class="mt-4 text-xs text-gray-500 bg-red-50 p-3 rounded-xl">
+            <b>วิธีพิมพ์:</b> Ctrl+P → Save as PDF → A4 → Margins: None
+        </div>
+
+        <div class="mt-2 text-xs text-gray-400">
+            เวอร์ชัน 0.3.0
+        </div>
+    </div>
+
+    <!-- พื้นที่พิมพ์ -->
+    <div id="print-area">
+        <!-- จะสร้าง qr-box ด้วย JavaScript ตามจำนวนที่เลือก -->
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const printBtn = document.getElementById('print-btn');
+        const imageCountSelect = document.getElementById('image-count');
+        const orientationSelect = document.getElementById('orientation');
+        const uploadHint = document.getElementById('upload-hint');
+        const printArea = document.getElementById('print-area');
+
+        let uploadedImages = [];
+        let currentCount = 1;
+
+        // สร้าง qr-box ตามจำนวน
+        function createQrBoxes(count) {
+            printArea.innerHTML = '';
+            
+            // คำนวณ grid สำหรับ 2,4,6,8,10,12 (เรียงแนวนอน)
+            let cols, rows;
+            if (count === 1) {
+                cols = 1;
+                rows = 1;
+            } else {
+                // แบ่งเป็น 2 แถว หรือ 3 แถว ตามจำนวน
+                cols = Math.ceil(count / 2);
+                rows = 2;
+                if (count === 6 || count === 12) {
+                    cols = count / 2;
+                    rows = 2;
+                } else if (count === 4 || count === 8) {
+                    cols = Math.ceil(count / 2);
+                    rows = 2;
+                }
+            }
+            
+            printArea.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            printArea.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+            for (let i = 0; i < count; i++) {
+                const box = document.createElement('div');
+                box.className = 'qr-box';
+                box.id = `box-${i}`;
+                
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                empty.id = `empty-${i}`;
+                empty.innerHTML = `
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <p>รูปที่ ${i + 1}</p>
+                `;
+                
+                const img = document.createElement('img');
+                img.id = `qr-${i}`;
+                img.style.display = 'none';
+                
+                box.appendChild(empty);
+                box.appendChild(img);
+                printArea.appendChild(box);
+            }
+        }
+
+        // เมื่อเปลี่ยนจำนวนรูป
+        imageCountSelect.addEventListener('change', function() {
+            currentCount = parseInt(this.value);
+            uploadedImages = [];
+            
+            // แสดง/ซ่อน orientation สำหรับ 1 รูป
+            if (currentCount === 1) {
+                orientationSelect.parentElement.style.display = 'block';
+            } else {
+                orientationSelect.parentElement.style.display = 'none';
+            }
+            
+            createQrBoxes(currentCount);
+            updateHint();
+            updatePrintButton();
+            
+            // รีเซ็ต file input
+            fileInput.value = '';
+        });
+
+        // เมื่อเปลี่ยนแนว
+        orientationSelect.addEventListener('change', updateHint);
+
+        function updateHint() {
+            const count = currentCount;
+            const orient = orientationSelect.value;
+            
+            if (count === 1) {
+                const orientText = orient === 'portrait' ? 'แนวตั้ง' : 'แนวนอน';
+                uploadHint.innerHTML = `<b>วิธีพิมพ์:</b> Ctrl+P → Save as PDF → A4 → Margins: None<br><b>หมายเหตุ:</b> 1 รูป เต็มหน้า (${orientText})`;
+            } else {
+                const perRow = Math.ceil(count / 2);
+                uploadHint.innerHTML = `<b>วิธีพิมพ์:</b> Ctrl+P → Save as PDF → A4 → Margins: None<br><b>หมายเหตุ:</b> ${count} รูป (${perRow}x2) เรียงแนวนอน ขนาดเท่ากัน พอดี A4`;
+            }
+        }
+
+        // อัปโหลดรูป
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length > 0) {
+                // ถ้าเลือกหลายรูป ใช้รูปแรกสำหรับ 1 รูป หรือใช้ทุกรูปสำหรับหลายรูป
+                if (currentCount === 1) {
+                    // 1 รูป = ใช้รูปแรกสำหรับทุกช่อง
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const dataUrl = event.target.result;
+                        
+                        for (let i = 0; i < currentCount; i++) {
+                            const img = document.getElementById(`qr-${i}`);
+                            const empty = document.getElementById(`empty-${i}`);
+                            if (img) {
+                                img.src = dataUrl;
+                                img.style.display = 'block';
+                                if (empty) empty.style.display = 'none';
+                            }
+                        }
+                        updatePrintButton();
+                    };
+                    reader.readAsDataURL(files[0]);
+                } else {
+                    // หลายรูป = ใช้ทุกรูปที่อัปโหลด
+                    let loadedCount = 0;
+                    
+                    files.slice(0, currentCount).forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const dataUrl = event.target.result;
+                            
+                            const img = document.getElementById(`qr-${index}`);
+                            const empty = document.getElementById(`empty-${index}`);
+                            if (img) {
+                                img.src = dataUrl;
+                                img.style.display = 'block';
+                                if (empty) empty.style.display = 'none';
+                            }
+                            
+                            loadedCount++;
+                            if (loadedCount === Math.min(files.length, currentCount)) {
+                                updatePrintButton();
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+        });
+
+        function updatePrintButton() {
+            // ตรวจสอบว่ามีรูปครบตามจำนวนที่เลือกหรือยัง
+            let hasImages = false;
+            
+            if (currentCount === 1) {
+                const img = document.getElementById('qr-0');
+                hasImages = img && img.src && img.style.display !== 'none';
+            } else {
+                let count = 0;
+                for (let i = 0; i < currentCount; i++) {
+                    const img = document.getElementById(`qr-${i}`);
+                    if (img && img.src && img.style.display !== 'none') {
+                        count++;
+                    }
+                }
+                hasImages = count === currentCount;
+            }
+            
+            if (hasImages) {
+                printBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                printBtn.disabled = false;
+            } else {
+                printBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                printBtn.disabled = true;
+            }
+        }
+
+        function handlePrint() {
+            window.print();
+        }
+
+        // เริ่มต้น
+        createQrBoxes(1);
+        updateHint();
+    </script>
+</body>
+</html>

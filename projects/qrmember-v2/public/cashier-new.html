@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>เครื่องคิดเงิน JsuShop</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Tablet Portrait Optimized Layout */
+        * { -webkit-tap-highlight-color: transparent; }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+        }
+        
+        #app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 12px;
+        }
+        
+        /* Header */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .header-bar h1 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .header-bar .btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        /* Customer Section */
+        .customer-section {
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-shrink: 0;
+        }
+        
+        .customer-search {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .customer-search input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+        
+        .customer-search .btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+        }
+        
+        .selected-customer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #f1f5f9;
+            border-radius: 12px;
+        }
+        
+        .customer-info strong {
+            font-size: 1.1rem;
+        }
+        
+        .customer-points {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        /* Amount Display */
+        .amount-section {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .amount-section .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .amount-section .value {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        
+        /* Calculator Section */
+        .calculator-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        .calc-display {
+            background: #1e293b;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .calc-grid .btn {
+            font-size: 1.4rem;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 0;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calc-grid .btn--tertiary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        
+        .calc-grid .btn--tertiary:active {
+            background: #cbd5e1;
+        }
+        
+        .calc-grid .op {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .calc-grid .equals {
+            background: #10b981;
+            color: white;
+            grid-row: span 2;
+        }
+        
+        /* Cash Input Section */
+        .cash-section {
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .cash-section label {
+            font-size: 0.9rem;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        
+        .cash-section input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .cash-section .change {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #10b981;
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        /* Quick Cash */
+        .quick-cash {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .quick-cash .btn {
+            flex: 1;
+            min-width: calc(33% - 6px);
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        /* Action Buttons */
+        .action-section {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .action-section .btn {
+            flex: 1;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 16px;
+        }
+        
+        #cancel-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        #add-points-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        /* Search Results */
+        #live-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        
+        #live-search-results.show {
+            display: block;
+        }
+        
+        .live-search-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+        }
+        
+        .live-search-item:active {
+            background: #f1f5f9;
+        }
+        
+        /* Hidden elements for JS compatibility */
+        .hidden { display: none !important; }
+        
+        /* Loading */
+        #loading-view {
+            position: fixed;
+            inset: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        /* Error message */
+        #cashier-error {
+            display: none;
+            padding: 12px;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            #app { padding: 16px; gap: 16px; }
+            .header-bar h1 { font-size: 1.3rem; }
+            .amount-section .value { font-size: 4rem; }
+            .calc-grid .btn { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Loading (show initially) -->
+<div id="loading-view" style="position:fixed;inset:0;background:white;display:flex;align-items:center;justify-content:center;z-index:1000;">
+    <div style="text-align:center;">
+        <div class="loader"></div>
+        <p style="margin-top:16px;color:#64748b;">กำลังโหลด...</p>
+    </div>
+</div>
+    <div id="cashier-view" class="hidden"></div>
+    <div id="global-progress-container" class="hidden"><div id="global-progress-bar"></div></div>
+    <div id="app-modal" class="hidden"></div>
+    <div id="cashier-tabs-container" class="hidden"></div>
+    
+    <!-- Header -->
+    <header class="header-bar">
+        <h1>🛒 JsuShop</h1>
+        <a href="staff.html" class="btn" style="background:rgba(255,255,255,0.2);color:white;">🔙 กลับ</a>
+    </header>
+
+    <!-- Customer Section -->
+    <section class="customer-section">
+        <div class="customer-search">
+            <input type="text" id="customer-identifier" placeholder="ค้นหาลูกค้า (ชื่อ/เบอร์)" autocomplete="off">
+            <button id="scan-qr-btn" class="btn" style="background:#667eea;color:white;">📷</button>
+            <div id="live-search-results"></div>
+        </div>
+        <div class="selected-customer">
+            <div class="customer-info">
+                <span>ลูกค้า: </span>
+                <strong id="customer-name">ลูกค้าทั่วไป</strong>
+                <button id="clear-customer-btn" class="btn" style="padding:4px 8px;font-size:12px;margin-left:8px;">เปลี่ยน</button>
+            </div>
+            <span class="customer-points"><span id="customer-points">0</span> แต้ม</span>
+        </div>
+    </section>
+
+    <!-- Amount Display -->
+    <section class="amount-section">
+        <p class="label">ยอดรวมที่ต้องชำระ</p>
+        <p class="value"><span id="amount-due">0.00</span></p>
+        <p style="opacity:0.8;font-size:0.9rem;">บาท</p>
+    </section>
+
+    <!-- Calculator -->
+    <section class="calculator-section">
+        <div class="calc-display" id="mini-calc-history">0</div>
+        <div class="calc-grid" id="mini-calc-pad">
+            <button class="btn btn--tertiary" data-key="C">C</button>
+            <button class="btn btn--tertiary" data-key="backspace">⌫</button>
+            <button class="btn btn--tertiary op" data-key="/">÷</button>
+            <button class="btn btn--tertiary op" data-key="*">×</button>
+            
+            <button class="btn btn--tertiary" data-key="7">7</button>
+            <button class="btn btn--tertiary" data-key="8">8</button>
+            <button class="btn btn--tertiary" data-key="9">9</button>
+            <button class="btn btn--tertiary op" data-key="-">−</button>
+            
+            <button class="btn btn--tertiary" data-key="4">4</button>
+            <button class="btn btn--tertiary" data-key="5">5</button>
+            <button class="btn btn--tertiary" data-key="6">6</button>
+            <button class="btn btn--tertiary op" data-key="+">+</button>
+            
+            <button class="btn btn--tertiary" data-key="1">1</button>
+            <button class="btn btn--tertiary" data-key="2">2</button>
+            <button class="btn btn--tertiary" data-key="3">3</button>
+            <button class="btn btn--tertiary equals" data-key="=">=</button>
+            
+            <button class="btn btn--tertiary" data-key="0" style="grid-column:span 2;">0</button>
+            <button class="btn btn--tertiary" data-key=".">.</button>
+        </div>
+    </section>
+
+    <!-- Cash Input -->
+    <section class="cash-section">
+        <label>รับเงิน:</label>
+        <input type="number" id="cash-tendered-input" placeholder="0" inputmode="decimal">
+        <div class="change">=<span id="change-due">0.00</span></div>
+    </section>
+
+    <!-- Quick Cash -->
+    <div class="quick-cash">
+        <button class="btn quick-cash-btn" data-amount="exact">พอดี</button>
+        <button class="btn quick-cash-btn" data-amount="20">20</button>
+        <button class="btn quick-cash-btn" data-amount="50">50</button>
+        <button class="btn quick-cash-btn" data-amount="100">100</button>
+        <button class="btn quick-cash-btn" data-amount="500">500</button>
+        <button class="btn quick-cash-btn" data-amount="1000">1000</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-section">
+        <button id="cancel-btn" class="btn">ยกเลิก</button>
+        <button id="add-points-btn" class="btn">✅ ยืนยัน & บันทึกแต้ม</button>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="cashier-error"></div>
+</div>
+
+<span id="app-version" class="version-display"></span>
+<script src="cashier.js" type="module" defer></script>
+<script src="version.js" defer></script>
+</body>
+</html>

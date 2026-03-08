@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ ค่าไฟฟ้า</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --primary: #667eea; --bg: #f5f5f5; --card: white; --text: #333; --text-light: #666; --success: #4caf50; --danger: #f44336; --warning: #ffc107; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; padding-bottom: 70px; }
+        
+        .header { position: sticky; top: 0; background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%); color: white; padding: 12px 16px; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .header h2 { font-size: 18px; }
+        .header-stats { font-size: 12px; opacity: 0.9; }
+
+        .container { max-width: 420px; margin: 0 auto; padding: 12px; }
+
+        .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .action-card { background: var(--card); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .action-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .action-info h4 { font-size: 14px; }
+        .action-info span { font-size: 12px; color: var(--text-light); }
+
+        .section { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .section-title { font-size: 13px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-group { flex: 1; }
+        .input-group label { display: block; font-size: 11px; color: var(--text-light); margin-bottom: 4px; }
+        .input-group input { width: 100%; padding: 10px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 14px; }
+        .input-group input:focus { border-color: var(--primary); outline: none; }
+
+        .tenant-card { background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+        .tenant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .tenant-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .tenant-badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+        .tenant-badge.meter { background: var(--primary); color: white; }
+        .tenant-badge.auto { background: var(--warning); color: #333; }
+        .tenant-badge.direct { background: var(--success); color: white; }
+        .tenant-inputs { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .tenant-inputs input { width: 60px; padding: 8px; border: 2px solid #e8e8e8; border-radius: 6px; text-align: center; font-size: 13px; }
+        .tenant-arrow { color: #888; }
+        .tenant-or { font-size: 10px; color: #999; }
+
+        .result-grid { display: grid; gap: 8px; }
+        .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fff3e0; border-radius: 8px; }
+        .result-info { display: flex; align-items: center; gap: 8px; }
+        .result-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .result-name { font-weight: 600; font-size: 13px; }
+        .result-unit { font-size: 11px; color: var(--text-light); }
+        .result-pay { font-size: 16px; font-weight: 700; color: var(--danger); }
+        .result-real { font-size: 11px; color: var(--text-light); }
+
+        .btn { width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:disabled { opacity: 0.5; }
+        .btn-row { display: flex; gap: 8px; }
+        .btn-row .btn { flex: 1; }
+        .btn-share { background: white; border: 2px solid; font-size: 12px; padding: 10px; }
+
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+        .filter-bar select { flex: 1; padding: 8px; border: 2px solid #e8e8e8; border-radius: 8px; font-size: 13px; background: white; }
+
+        .history-list { max-height: calc(100vh - 200px); overflow-y: auto; }
+        .history-item { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .history-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .history-date { font-weight: 600; font-size: 13px; }
+        .history-total { font-weight: 700; color: var(--danger); font-size: 15px; }
+        .history-meta { font-size: 11px; color: var(--text-light); }
+        .history-tenants { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+        .history-tenant { font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #f0f0f0; }
+        .history-actions { display: flex; gap: 6px; margin-top: 10px; }
+        .history-btn { padding: 6px 10px; border-radius: 6px; font-size: 11px; border: none; cursor: pointer; }
+        .history-btn.paid { background: #e8f5e9; color: var(--success); }
+        .history-btn.delete { background: #ffebee; color: var(--danger); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stats-card { background: var(--card); border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .stats-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .stats-label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+        .stats-card.success .stats-value { color: var(--success); }
+        .stats-card.danger .stats-value { color: var(--danger); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 16px; cursor: pointer; border-radius: 8px; }
+        .nav-item.active { background: #e8eaf6; }
+        .nav-icon { font-size: 20px; }
+        .nav-label { font-size: 10px; font-weight: 600; color: var(--text-light); }
+        .nav-item.active .nav-label { color: var(--primary); }
+
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; z-index: 1000; }
+        .toast.show { opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        .page { display: none; }
+        .page.active { display: block; }
+        .empty { text-align: center; padding: 30px; color: var(--text-light); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-content">
+        <h2>⚡ ค่าไฟฟ้า</h2>
+        <div class="header-stats" id="headerStats">📊 0 บิล</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page active" id="page-new">
+        <div class="quick-actions">
+            <div class="action-card">
+                <div class="action-icon" style="background:#e3f2fd">💰</div>
+                <div class="action-info"><h4>ยอดเงิน</h4><span id="quickMoney">0 ฿</span></div>
+            </div>
+            <div class="action-card">
+                <div class="action-icon" style="background:#fff3e0">⚡</div>
+                <div class="action-info"><h4>หน่วยรวม</h4><span id="quickUnits">0 หน่วย</span></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📋 ข้อมูลบิล กฟน.</div>
+            <div class="input-row">
+                <div class="input-group"><label>ยอดเงิน (บาท)</label><input type="number" id="totalMoney" placeholder="0.00" oninput="calculate()"></div>
+                <div class="input-group"><label>หน่วยรวม</label><input type="number" id="totalUnit" placeholder="0" oninput="calculate()"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔌 มิเตอร์ / หน่วย</div>
+            <div id="tenantsContainer"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💰 ยอดที่ต้องเก็บ</div>
+            <div class="result-grid" id="resultsContainer"></div>
+            <div style="text-align:center;font-size:11px;color:#888;margin-top:10px;">📊 อัตรา: <span id="avgRate">0.0000</span> บ/หน่วย</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveBill()" id="saveBtn" disabled>💾 บันทึกบิล</button>
+        <div class="btn-row" style="margin-top:8px;">
+            <button class="btn btn-share" style="border-color:#25D366;color:#25D366" onclick="shareResult('wa')" id="shareWaBtn" disabled>📤 วา</button>
+            <button class="btn btn-share" style="border-color:#FF6B6B;color:#FF6B6B" onclick="shareResult('jane')" id="shareJaneBtn" disabled>📤 เจน</button>
+            <button class="btn btn-share" style="border-color:#9C27B0;color:#9C27B0" onclick="shareResult('nid')" id="shareNidBtn" disabled>📤 นิด</button>
+        </div>
+    </div>
+
+    <div class="page" id="page-history">
+        <div class="filter-bar">
+            <select id="filterMonth" onchange="loadHistory()"><option value="">ทุกเดือน</option></select>
+            <select id="filterStatus" onchange="loadHistory()"><option value="">ทุกสถานะ</option><option value="unpaid">ยังไม่จ่าย</option><option value="paid">จ่ายแล้ว</option></select>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+    <div class="page" id="page-stats">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="section" style="margin-top:12px;">
+            <div class="section-title">📊 สถิติตามห้อง</div>
+            <div id="statsByTenant"></div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchPage('new')"><span class="nav-icon">📝</span><span class="nav-label">บิลใหม่</span></div>
+    <div class="nav-item" onclick="switchPage('history')"><span class="nav-icon">📚</span><span class="nav-label">ประวัติ</span></div>
+    <div class="nav-item" onclick="switchPage('stats')"><span class="nav-icon">📈</span><span class="nav-label">สถิติ</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {apiKey:"AIzaSyAzZjdxoAJYI0q_ai7gIa-G4qFqKB7st3s",authDomain:"secondphone-fe9a9.firebaseapp.com",projectId:"secondphone-fe9a9",storageBucket:"secondphone-fe9a9.firebasestorage.app",messagingSenderId:"619983782470",appId:"1:619983782470:web:d2394c5658fdf3abae8047"};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const tenants=[{id:'wa',name:'วา',color:'#25D366'},{id:'jane',name:'เจน',color:'#FF6B6B'},{id:'nid',name:'นิด',color:'#9C27B0'}];
+
+function init(){renderTenants();renderResults();initFilterMonth();updateHeaderStats();}
+
+function renderTenants(){document.getElementById('tenantsContainer').innerHTML=tenants.map(t=>`<div class="tenant-card"><div class="tenant-header"><div class="tenant-name"><span style="color:${t.color}">●</span> ห้อง ${t.name}</div><span class="tenant-badge" id="badge${cap(t.id)}">0 หน่วย</span></div><div class="tenant-inputs"><input type="number" placeholder="มิเตอร์เก่า" id="meterOld${cap(t.id)}" oninput="calculate()"><span class="tenant-arrow">→</span><input type="number" placeholder="มิเตอร์ใหม่" id="meterNew${cap(t.id)}" oninput="calculate()"><span class="tenant-or">หรือ</span><input type="number" placeholder="หน่วย" id="unit${cap(t.id)}" oninput="calculate()" style="width:50px"></div></div>`).join('');}
+
+function renderResults(){document.getElementById('resultsContainer').innerHTML=tenants.map(t=>`<div class="result-row"><div class="result-info"><div class="result-avatar" style="background:${t.color}">👩</div><div><div class="result-name">ห้อง ${t.name}</div><div class="result-unit" id="unitText${cap(t.id)}">0 หน่วย</div></div></div><div class="result-pay" id="final${cap(t.id)}">0 ฿</div></div>`).join('');}
+
+function initFilterMonth(){const s=document.getElementById('filterMonth');const n=new Date();for(let i=0;i<12;i++){const d=new Date(n.getFullYear(),n.getMonth()-i,1);const o=document.createElement('option');o.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;o.textContent=d.toLocaleDateString('th-TH',{month:'long',year:'numeric'});s.appendChild(o);}}
+
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function switchPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');document.querySelector(`.nav-item[onclick="switchPage('${p}')"]`).classList.add('active');if(p==='history')loadHistory();if(p==='stats')loadStats();}
+
+function getUnit(pid){const du=parseFloat(document.getElementById('unit'+cap(pid)).value)||0;const o=parseFloat(document.getElementById('meterOld'+cap(pid)).value)||0;const n=parseFloat(document.getElementById('meterNew'+cap(pid)).value)||0;return{unit:du||Math.max(0,n-o),fromDirect:du>0,fromMeter:!du&&(o||n)};}
+
+function calculate(){const tm=parseFloat(document.getElementById('totalMoney').value)||0;const tu=parseFloat(document.getElementById('totalUnit').value)||0;document.getElementById('quickMoney').textContent=tm.toLocaleString()+' ฿';document.getElementById('quickUnits').textContent=tu.toLocaleString()+' หน่วย';const us={},au={};tenants.forEach(t=>{const{unit,fromDirect}=getUnit(t.id);if(unit>0){us[t.id]=unit;au[t.id]=false;const b=document.getElementById('badge'+cap(t.id));b.className='tenant-badge '+(fromDirect?'direct':'meter');b.textContent=unit+' หน่วย';}else{us[t.id]=0;au[t.id]=true;}});const fc=Object.keys(us).filter(k=>!au[k]).length;if(tm>0&&tu>0&&fc>0){const fu=Object.values(us).reduce((a,b)=>a+b,0);const rem=tu-fu;const uf=tenants.filter(t=>au[t.id]);const av=uf.length?rem/uf.length:0;uf.forEach(t=>{us[t.id]=av;const b=document.getElementById('badge'+cap(t.id));b.className='tenant-badge auto';b.textContent=Math.round(av*100)/100+' หน่วย';});const avg=tm/tu;document.getElementById('avgRate').textContent=avg.toFixed(4);tenants.forEach(t=>{const u=us[t.id],p=u*avg;document.getElementById('unitText'+cap(t.id)).textContent=u.toFixed(2)+' หน่วย';document.getElementById('final'+cap(t.id)).textContent=Math.ceil(p)+' ฿';});document.getElementById('saveBtn').disabled=false;tenants.forEach(t=>document.getElementById('share'+cap(t.id)+'Btn').disabled=false);}else{document.getElementById('saveBtn').disabled=true;tenants.forEach(t=>{document.getElementById('share'+cap(t.id)+'Btn').disabled=true;document.getElementById('badge'+cap(t.id)).textContent='0 หน่วย';});}return us;}
+
+async function saveBill(){const tm=parseFloat(document.getElementById('totalMoney').value)||0;const tu=parseFloat(document.getElementById('totalUnit').value)||0;const us=calculate();const avg=tm/tu;const bill={date:new Date().toISOString(),totalMoney:tm,totalUnit:tu,rate:avg,meters:{},tenants:{},paid:{}};tenants.forEach(t=>{const ov=parseFloat(document.getElementById('meterOld'+cap(t.id)).value)||0;const nv=parseFloat(document.getElementById('meterNew'+cap(t.id)).value)||0;const du=parseFloat(document.getElementById('unit'+cap(t.id)).value)||0;bill.meters[t.id]={old:ov,new:nv,directUnit:du};const u=us[t.id],p=u*avg;bill.tenants[t.id]={meterOld:ov,meterNew:nv,directUnit:du,unit:u,pay:Math.ceil(p),realPay:p};bill.paid[t.id]=false;});try{await db.collection('electricity_bills').add(bill);showToast('✅ บันทึกบิลสำเร็จ!','success');clearForm();updateHeaderStats();}catch(e){showToast('❌ ข้อผิดพลาด','error');}}
+
+function clearForm(){document.getElementById('totalMoney').value='';document.getElementById('totalUnit').value='';document.getElementById('quickMoney').textContent='0 ฿';document.getElementById('quickUnits').textContent='0 หน่วย';tenants.forEach(t=>{document.getElementById('meterOld'+cap(t.id)).value='';document.getElementById('meterNew'+cap(t.id)).value='';document.getElementById('unit'+cap(t.id)).value='';document.getElementById('badge'+cap(t.id)).textContent='0 หน่วย';document.getElementById('unitText'+cap(t.id)).textContent='0 หน่วย';document.getElementById('final'+cap(t.id)).textContent='0 ฿';});document.getElementById('avgRate').textContent='0.0000';document.getElementById('saveBtn').disabled=true;}
+
+async function updateHeaderStats(){const s=await db.collection('electricity_bills').get();document.getElementById('headerStats').textContent='📊 '+s.size+' บิล';}
+
+async function loadHistory(){const l=document.getElementById('historyList');const fm=document.getElementById('filterMonth').value;const fs=document.getElementById('filterStatus').value;try{const s=await db.collection('electricity_bills').get();if(s.empty){l.innerHTML='<div class="empty">ยังไม่มีบิล</div>';return;}let b=s.docs.map(d=>({id:d.id,...d.data()}));b.sort((a,b)=>new Date(b.date)-new Date(a.date));if(fm)b=b.filter(x=>x.date&&x.date.startsWith(fm));if(fs==='paid')b=b.filter(x=>x.paid&&Object.keys(x.paid).length>0&&Object.values(x.paid).some(v=>v));if(fs==='unpaid')b=b.filter(x=>!x.paid||Object.keys(x.paid).length===0||Object.values(x.paid).every(v=>!v));if(b.length===0){l.innerHTML='<div class="empty">ไม่พบบิล</div>';return;}l.innerHTML=b.map(bill=>{const d=new Date(bill.date);const ds=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});const po=bill.paid||{};let th='';tenants.forEach(t=>{const tt=bill.tenants&&bill.tenants[t.id];if(!tt)return;let i=tt.directUnit?`หน่วย:${tt.directUnit}`:(tt.meterOld?`${tt.meterOld}→${tt.meterNew}`:(tt.unit?`${tt.unit.toFixed(0)}หน่วย`:'-'));th+=`<span class="history-tenant" style="border-left:3px solid ${t.color}">${t.name}:${i}${po[t.id]?'✓':''}</span>`;});return`<div class="history-item"><div class="history-item-header"><span class="history-date">📅 ${ds}</span><span class="history-total">${bill.totalMoney} ฿</span></div><div class="history-meta">⚡ ${bill.totalUnit} หน่วย | 📊 ${bill.rate?.toFixed(4)||'0.0000'} บ/หน่วย</div><div class="history-tenants">${th}</div><div class="history-actions">${Object.values(po).some(v=>v)?'':`<button class="history-btn paid" onclick="togglePaid('${bill.id}')">✓ จ่ายแล้ว</button>`}<button class="history-btn delete" onclick="deleteBill('${bill.id}')">🗑️ ลบ</button></div></div>`;}).join('');}catch(e){l.innerHTML='<div class="empty">❌ โหลดไม่ได้</div>';}}
+
+async function togglePaid(id){try{const np={};tenants.forEach(t=>np[t.id]=true);await db.collection('electricity_bills').doc(id).update({paid:np});showToast('✅ บันทึกการจ่ายแล้ว','success');loadHistory();}catch(e){showToast('❌ ข้อผิดพลาด','error');}}
+
+async function deleteBill(id){if(!confirm('ลบบิลนี้?'))return;try{await db.collection('electricity_bills').doc(id).delete();showToast('🗑️ ลบบิลแล้ว','success');loadHistory();updateHeaderStats();}catch(e){showToast('❌ ข้อผิดพลาด','error');}}
+
+async function loadStats(){const s=await db.collection('electricity_bills').get();const b=s.docs.map(d=>d.data());const tb=b.length;const tm=b.reduce((a,x)=>a+(x.totalMoney||0),0);const tu=b.reduce((a,x)=>a+(x.totalUnit||0),0);const p=b.filter(x=>x.paid&&Object.values(x.paid).every(v=>v)).length;document.getElementById('statsGrid').innerHTML=`<div class="stats-card"><div class="stats-value">${tb}</div><div class="stats-label">จำนวนบิล</div></div><div class="stats-card"><div class="stats-value">${tm.toLocaleString()}</div><div class="stats-label">รวมเงิน (฿)</div></div><div class="stats-card success"><div class="stats-value">${p}</div><div class="stats-label">จ่ายแล้ว</div></div><div class="stats-card danger"><div class="stats-value">${tb-p}</div><div class="stats-label">ยังไม่จ่าย</div></div>`;let sh='<div style="display:grid;gap:8px;">';tenants.forEach(t=>{const tt=b.reduce((a,x)=>a+(x.tenants?.[t.id]?.pay||0),0);const u=b.reduce((a,x)=>a+(x.tenants?.[t.id]?.unit||0),0);sh+=`<div style="display:flex;justify-content:space-between;padding:10px;background:#f8f9fa;border-radius:8px;"><span style="color:${t.color};font-weight:600">ห้อง ${t.name}</span><span>${tt.toLocaleString()} ฿ (${u.toFixed(0)} หน่วย)</span></div>`;});sh+='</div>';document.getElementById('statsByTenant').innerHTML=sh;}
+
+async function shareResult(pid){const tm=parseFloat(document.getElementById('totalMoney').value)||0;const tu=parseFloat(document.getElementById('totalUnit').value)||0;const us=calculate();const avg=tm/tu;const t=tenants.find(x=>x.id===pid);const u=us[pid],p=u*avg;const ov=parseFloat(document.getElementById('meterOld'+cap(pid)).value)||0;const nv=parseFloat(document.getElementById('meterNew'+cap(pid)).value)||0;const du=parseFloat(document.getElementById('unit'+cap(pid)).value)||0;const src=du?'หน่วยตรง':(ov||nv?'มิเตอร์':'คำนวณอัตโนมัติ');let txt=`⚡ ค่าไฟฟ้า - ห้อง ${t.name}\n────────────────\n📌 ข้อมูล: ${src}\n${ov||nv?`📟 มิเตอร์: ${ov} → ${nv}`:''}\n📊 หน่วยที่ใช้: ${u.toFixed(2)} หน่วย\n📈 อัตรา: ${avg.toFixed(4)} บาท/หน่วย\n💰 ยอดจริง: ${p.toFixed(2)} บาท\n💵 ยอดปัดขึ้น: ${Math.ceil(p)} บาท\n────────────────\n#ห้อง${t.name} #ค่าไฟ`;try{if(navigator.share)await navigator.share({title:`⚡ ค่าไฟ - ห้อง ${t.name}`,text:txt});else{await navigator.clipboard.writeText(txt);showToast('📋 คัดลอกแล้ว!');}}catch(e){showToast('❌ ไม่สำเร็จ');}}
+
+function showToast(m,t=''){const x=document.getElementById('toast');x.textContent=m;x.className='toast show '+t;setTimeout(()=>x.className='toast',2500);}
+
+init();
+</script>
+</body>
+</html>

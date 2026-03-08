@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Base Styles */
+body {
+    font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Components */
+.btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-success {
+    @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-tertiary {
+    @apply inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.btn-sm {
+    @apply px-3 py-2 text-sm;
+}
+
+.btn-lg {
+    @apply px-6 py-4 text-lg;
+}
+
+.btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors;
+}
+
+.input-field {
+    @apply w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all;
+}
+
+.card {
+    @apply bg-white rounded-2xl shadow-lg p-6;
+}
+
+.card-header {
+    @apply mb-6 text-center;
+}
+
+.card-header h1 {
+    @apply mb-2;
+}
+
+.card-header p {
+    @apply text-slate-500;
+}
+
+.modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50;
+}
+
+.modal-content {
+    @apply bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 transform transition-all;
+}
+
+.loader {
+    @apply inline-block w-8 h-8 border-4 border-slate-200 border-t-indigo-500 rounded-full animate-spin;
+}
+
+.error-message {
+    @apply text-red-500 text-sm font-medium;
+}
+
+.success-message {
+    @apply text-green-500 text-sm font-medium;
+}
+
+.tab-btn.active {
+    @apply border-b-2 border-indigo-500 text-indigo-600;
+}
+
+.tab-content.hidden {
+    @apply hidden;
+}
+
+.is-loading {
+    @apply relative text-transparent;
+}
+
+.is-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: auto;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+.btn-tertiary.is-loading::after {
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: #6366f1;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

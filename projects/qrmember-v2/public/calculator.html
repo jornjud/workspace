@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคำนวณแต้ม</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-main">
+
+<div id="global-progress-container" class="hidden">
+    <div id="global-progress-bar"></div>
+</div>
+
+<div id="app" class="app-container">
+    <main class="card card--narrow">
+        <header class="card__header mb-6">
+            <h1>🧮 เครื่องคำนวณแต้ม</h1>
+            <p>คำนวณแต้มที่ควรใช้สำหรับของรางวัลแต่ละชิ้น</p>
+        </header>
+
+        <div class="calculator-form" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="item-cost" class="input-label">ราคาทุนของรางวัล (บาท)</label>
+                <input type="number" id="item-cost" placeholder="เช่น 120" class="input-field" min="0">
+            </div>
+            
+            <div>
+                <label for="value-back-rate" class="input-label">อัตราผลตอบแทนที่ให้ลูกค้า (%)</label>
+                <select id="value-back-rate" class="input-field">
+                    <option value="0.01">1% (ทั่วไป)</option>
+                    <option value="0.015">1.5%</option>
+                    <option value="0.02" selected>2% (แนะนำ)</option>
+                    <option value="0.025">2.5%</option>
+                    <option value="0.03">3% (ใจดี)</option>
+                    <option value="0.035">3.5%</option>
+                    <option value="0.04">4%</option>
+                    <option value="0.045">4.5%</option>
+                    <option value="0.05">5% (ใจป้ำมาก)</option>
+                </select>
+            </div>
+            
+            <button id="calculate-btn" class="btn btn--primary">คำนวณแต้ม</button>
+        </div>
+
+        <div id="result-container" class="hidden mt-6 text-center p-4 bg-light rounded-lg">
+            <p>ของรางวัลราคาทุน <span id="result-cost" class="font-bold"></span> บาท</p>
+            <p>ควรตั้งค่าให้ใช้แลกประมาณ:</p>
+            <div class="result-points font-bold text-2xl text-primary-color">
+                <span id="result-points-value">0</span> แต้ม
+            </div>
+            <p class="text-xs text-medium mt-2">สูตร: (ราคาทุน ÷ อัตราผลตอบแทน) ÷ 100</p>
+        </div>
+        
+        <a href="staff.html" class="btn btn--tertiary mt-8">&larr; กลับไปหน้าจัดการหลัก</a>
+    </main>
+</div>
+
+<span id="app-version" class="version-display"></span>
+<script src="version.js" defer></script>
+<script src="calculator.js" type="module"></script>
+
+</body>
+</html>

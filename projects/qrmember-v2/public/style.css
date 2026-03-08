@@ -1,0 +1,1141 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+/* ============================================
+    🎨 DESIGN SYSTEM & VARIABLES
+    ============================================ */
+:root {
+    /* Primary Colors - Vibrant Gradient */
+    --primary-color: #6366f1; /* indigo-500 */
+    --primary-color-hover: #4f46e5; /* indigo-600 */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    /* Secondary & Accent Colors */
+    --secondary-color: #f59e0b; /* amber-500 */
+    --secondary-color-hover: #d97706; /* amber-600 */
+    --success-color: #10b981; /* green-500 */
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --danger-color: #ef4444; /* red-500 */
+    --danger-color-hover: #dc2626; /* red-600 */
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-color: #f59e0b; /* amber-500 */
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    
+    /* Text Colors */
+    --text-dark: #1e293b;    /* slate-800 */
+    --text-medium: #64748b;   /* slate-500 */
+    --text-light: #94a3b8;    /* slate-400 */
+    
+    /* Background Colors */
+    --bg-main: #f8fafc;        /* slate-50 */
+    --bg-card: #ffffff;
+    --bg-light: #f1f5f9;       /* slate-100 */
+    --bg-interactive: #eef2ff; /* indigo-100 */
+
+    /* Border */
+    --border-color: #e2e8f0;   /* slate-200 */
+    --border-focus: var(--primary-color);
+    
+    /* Shadows - Multiple levels for depth */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --card-shadow: var(--shadow-lg);
+    
+    /* Border Radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --border-radius: var(--radius-lg);
+    
+    /* Transitions */
+    --transition-speed: 0.2s;
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Spacing */
+    --spacing-unit: 1rem;
+}
+
+/* ============================================
+    🌍 GLOBAL STYLES & RESETS
+    ============================================ */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================
+    🛠️ UTILITY & HELPERS
+    ============================================ */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.text-center { text-align: center; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+
+/* ============================================
+    📱 TOUCH-FRIENDLY IMPROVEMENTS
+    ============================================ */
+.btn, .calc-btn, .live-search-item, .reward-item button, .tab-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+.btn:active, .calc-btn:active {
+    transform: scale(0.96);
+    transition: transform 0.1s ease;
+}
+.input-field, select.input-field {
+    min-height: 48px;
+    font-size: 1rem; /* Prevent iOS zoom */
+    padding: 0.875rem 1rem;
+}
+select.input-field {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 3rem;
+    appearance: none;
+}
+
+/* ============================================
+    🎴 CORE COMPONENTS: Card, Button, Form, Modal
+    ============================================ */
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+.card {
+    background-color: var(--bg-card);
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 500px;
+}
+.card--wide { max-width: 900px; }
+.card__header { text-align: center; margin-bottom: 2rem; }
+.card__header h1 { font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
+.card__header p { color: var(--text-medium); margin: 0; }
+
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn:disabled, .btn.is-loading { opacity: 0.6; cursor: not-allowed; }
+.btn--primary { background: var(--primary-gradient); color: white; }
+.btn--secondary { background-color: var(--secondary-color); color: white; }
+.btn--tertiary { background-color: transparent; border-color: var(--border-color); }
+.btn--success { background: var(--success-gradient); color: white; }
+.btn--danger { background: var(--danger-gradient); color: white; }
+.btn--auto { width: auto; }
+.btn--sm { padding: 0.5rem 1rem; font-size: 0.9rem; min-height: 40px; }
+.btn.is-loading .btn-text { visibility: hidden; }
+.btn.is-loading::after {
+    content: '';
+    position: absolute;
+    width: 1.25rem; height: 1.25rem;
+    margin: auto; inset: 0;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+}
+.btn--tertiary.is-loading::after { border-color: rgba(0, 0, 0, 0.2); border-top-color: var(--primary-color); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.input-field {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-smooth);
+}
+.input-field:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.error-message:not(:empty) {
+    color: var(--danger-color);
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: block;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-smooth);
+}
+.modal-backdrop:not(.hidden) { opacity: 1; visibility: visible; }
+.modal-content {
+    background: var(--bg-card);
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-xl);
+    transform: scale(0.9);
+    transition: transform var(--transition-smooth);
+}
+.modal-backdrop:not(.hidden) .modal-content { transform: scale(1); }
+
+/* ============================================
+    📊 SPECIFIC COMPONENTS: Analytics, Lists etc.
+    ============================================ */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+.stat-card {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-smooth);
+    overflow: hidden;
+    animation: slideInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); }
+.stat-card .stat-icon {
+    width: 56px; height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem; color: white;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+}
+.stat-card .stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; margin: 0.75rem 0; }
+.stat-card .stat-label { font-size: 0.9375rem; font-weight: 500; color: var(--text-medium); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-card--success .stat-icon { background: var(--success-gradient); }
+.stat-card--danger .stat-icon { background: var(--danger-gradient); }
+.stat-card--warning .stat-icon { background: var(--warning-gradient); }
+
+@keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ============================================
+    🛒 PAGE: CASHIER (Styles for NEW HTML)
+    ============================================ */
+
+/* --- Cashier Page Specific Styles --- */
+#cashier-view .card-header h1 {
+    font-size: 1.75rem; /* 28px */
+    margin-bottom: 0.25rem;
+}
+#cashier-view .card-header p {
+    font-size: 1rem;
+    color: #94a3b8; /* slate-400 */
+}
+
+#selected-customer-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: #eef2ff; /* indigo-100 */
+    border: 1px solid #c7d2fe; /* indigo-200 */
+    border-radius: var(--border-radius);
+    text-align: left;
+}
+#selected-customer-box p {
+    margin: 0;
+    line-height: 1.4;
+}
+#selected-customer-box strong {
+    font-size: 1.125rem; /* 18px */
+}
+
+/* Calculator Styles */
+.calculator-container {
+    margin-top: 1.5rem;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem; /* 12px */
+}
+
+/* ============================================
+    ✨ UPGRADE: ยอดรวมที่ต้องชำระ (Amount Due Box)
+    ============================================ */
+.amount-due-box {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7); /* ไล่สีเขียวสวยๆ */
+    border: 1px solid #bbf7d0; /* ขอบสีเขียวอ่อน */
+    border-radius: var(--radius-xl); /* ทำให้โค้งมนมากขึ้น */
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15); /* เพิ่มเงาฟุ้งๆ สีเขียว */
+    transition: all 0.3s ease;
+}
+
+.amount-due-box .label {
+    font-size: 1.1rem; /* ขยายขนาดตัวหนังสือ Label */
+    font-weight: 600;
+    color: #065f46; /* สีเขียวเข้ม */
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase; /* ทำให้เป็นตัวพิมพ์ใหญ่ทั้งหมด */
+    letter-spacing: 0.05em; /* เพิ่มระยะห่างตัวอักษร */
+}
+
+.amount-due-box .value {
+    font-size: 2.75rem; /* ขยายตัวเลขให้บึ้มๆ ไปเลย! */
+    font-weight: 800; /* ตัวหนาพิเศษ */
+    color: var(--success-color); /* ใช้สีเขียวหลักของธีม */
+    line-height: 1;
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.5); /* เพิ่มเงาให้ตัวเลขดูมีมิติ */
+}
+
+/* ✨ MODIFICATION START: Updated display styles for classic look */
+.display-screen {
+    background-color: #f1f5f9; /* slate-100 */
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    padding: 0.75rem 1.5rem;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: right;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.display-history {
+    font-size: 1rem;
+    color: #94a3b8; /* slate-400 */
+    height: 1.5rem;
+    min-height: 1.5rem;
+    overflow-x: auto; /* ✨ เปลี่ยนเป็น auto เพื่อให้เลื่อนได้ */
+    overflow-y: hidden; /* ป้องกันการเลื่อนแนวตั้ง */
+    text-overflow: clip; /* ✨ เปลี่ยนเป็น clip */
+    white-space: nowrap;
+    width: 100%;
+    /* ✨ เพิ่มสไตล์ให้ scrollbar สวยงาม (Optional) */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-light);
+}
+
+.display-main {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-dark); /* แก้จาก --dark-gray */
+    width: 100%;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* ✨ MODIFICATION END */
+
+.calc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    font-size: 1.75rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+    box-shadow: none;
+}
+
+.calc-btn.number {
+    color: #334155;
+    background-color: #f8fafc;
+}
+
+.calc-btn.number:hover {
+    background-color: #f1f5f9;
+}
+
+.calc-btn.zero {
+    grid-column: 1 / 3;
+    aspect-ratio: auto;
+}
+.calc-btn.operator {
+    background-color: #eef2ff;
+    color: var(--primary-color);
+}
+.calc-btn.operator:hover {
+    background-color: #e0e7ff;
+}
+.calc-btn#clear-btn {
+    color: var(--danger-color);
+}
+.calc-btn.enter {
+    grid-column: 4 / 5;
+    grid-row: 4 / 6;
+    height: auto;
+    aspect-ratio: auto;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-size: 1.75rem;
+}
+.calc-btn.enter:hover {
+    background-color: #4338ca;
+}
+
+/* Action Buttons Container (This is the original mobile layout) */
+.action-buttons-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr; 
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.action-buttons-container .btn {
+    margin-top: 0;
+    padding: 1.25rem 1rem;
+}
+
+/* Original Mobile Quick-Cash Grid */
+.quick-cash-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.quick-cash-grid .btn {
+    font-size: 1rem;
+    padding: 0.75rem 0.5rem;
+}
+
+/* ============================================
+    ✨ TAB COMPONENT STYLES
+    ============================================ */
+.tab-content {
+    display: none; /* ซ่อนเนื้อหาทั้งหมดไว้เป็นค่าเริ่มต้น */
+    animation: fadeIn 0.5s;
+}
+
+.tab-content.active {
+    display: block; /* แสดงเฉพาะเนื้อหาที่มีคลาส 'active' */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+    ✨ STYLES FOR TABS (UPGRADED)
+    ============================================ */
+
+.action-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-light);
+    padding: 0.5rem;
+    border-radius: var(--radius-lg);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    background-color: transparent;
+    color: var(--text-medium);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    text-align: center;
+}
+
+/* Different colors for each tab */
+.tab-btn:nth-child(1).active {
+    background: linear-gradient(135deg, #a5b4fc, #818cf8); /* Indigo */
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.tab-btn:nth-child(2).active {
+    background: linear-gradient(135deg, #fcd34d, #fbbf24); /* Amber */
+    color: #a16207;
+    box-shadow: var(--shadow-md);
+}
+
+.tab-btn:nth-child(3).active {
+    background: linear-gradient(135deg, #93c5fd, #60a5fa); /* Blue */
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.analytics-tab-btn.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-md);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+    ✨ STYLES FOR PAGINATION & NEW CONTROLS
+    ============================================ */
+
+.controls-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.pagination-btn {
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    min-width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: var(--bg-interactive);
+    border-color: var(--primary-color);
+}
+
+.pagination-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    align-self: flex-end;
+}
+
+/* ============================================
+    ✨ LIVE SEARCH RESULTS (UPGRADED V2)
+    ============================================ */
+.search-wrapper {
+    position: relative;
+}
+
+#live-search-results {
+    position: absolute;
+    width: 100%;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-top: 0.5rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 10;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.live-search-item {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-bottom: 1px solid #f1f5f9; /* slate-100 */
+}
+
+.live-search-item:last-child {
+    border-bottom: none;
+}
+
+/* สลับ 3 สีพาสเทล */
+.live-search-item:nth-child(3n+1) {
+    background-color: #ffffff; /* สีขาว */
+}
+.live-search-item:nth-child(3n+2) {
+    background-color: #f8fafc; /* สีเทาพาสเทล */
+}
+.live-search-item:nth-child(3n+3) {
+    background-color: #f0f9ff; /* สีฟ้าพาสเทล */
+}
+
+/* สีตอนเอาเมาส์ชี้ (Hover) */
+.live-search-item:hover {
+    background-color: #FF6413; /* สีส้ม */
+    color: white;
+}
+.live-search-item:hover .name,
+.live-search-item:hover .tel {
+    color: white;
+}
+
+.live-search-item p {
+    margin: 0;
+    pointer-events: none;
+}
+.live-search-item .name {
+    font-weight: 600;
+    color: var(--text-dark);
+    transition: color 0.2s ease;
+}
+.live-search-item .tel {
+    font-size: 0.875rem;
+    color: var(--text-medium);
+    transition: color 0.2s ease;
+}
+
+/* ============================================
+    🆕 CASHIER TABS (NEW)
+    ============================================ */
+.cashier-tabs-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.cashier-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-light);
+    color: var(--text-medium);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+.cashier-tab.active {
+    background-color: var(--bg-interactive);
+    color: var(--primary-color);
+    border-color: #a5b4fc;
+    box-shadow: var(--shadow-sm);
+}
+.cashier-tab-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cashier-tab-close {
+    font-size: 1.2rem;
+    line-height: 1;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+.cashier-tab-close:hover {
+    background-color: rgba(0,0,0,0.1);
+}
+.cashier-tab-add {
+    font-size: 1.5rem;
+    background-color: var(--bg-light);
+    border-radius: var(--radius-md);
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+.cashier-tab-add:hover {
+    background-color: var(--bg-interactive);
+    color: var(--primary-color);
+}
+
+
+/* ============================================
+    ✨ PRO CASHIER LAYOUT V5 (Mobile-First) ✨
+   (Breakpoint 640px)
+============================================
+*/
+
+/* * 1. BASE: MOBILE (< 640px) - 1 Column, Scrolling
+ */
+@media (max-width: 620px) {
+    /* * ทำให้โครงสร้าง HTML ใหม่ (ที่ออกแบบมาสำหรับ Grid)
+     * แตกกลับมาเป็น 1 คอลัมน์บนมือถือ
+     */
+    
+    .cashier-grid-container {
+        display: block; /* 1 column */
+        height: auto;
+    }
+
+    /* * ทำให้ 3 คอลัมน์ (left, calculator, payment) 
+     * กลับมาแสดงผลเป็น block ต่อกัน
+     */
+    .cashier-left-panel,
+    .cashier-calculator-panel,
+    .cashier-payment-panel {
+        display: block;
+        overflow: visible;
+    }
+    
+    /* * คืนค่า Layout ปุ่มยืนยัน/ยกเลิก ให้เป็น 2 ปุ่มข้างกัน
+     * (เพราะ HTML ใหม่ ย้าย footer เข้าไปใน payment-panel)
+     */
+    .cashier-payment-panel .action-buttons-container {
+         display: grid;
+         /* 🔥 หมายเหตุ: เราจะไม่ใช้ 1fr 2fr แล้ว
+           เพราะ layout ใหม่บนมือถือ (max-width: 620px)
+           มี .action-buttons-container { grid-template-columns: 1fr !important; }
+           ซึ่งแข็งแกร่งกว่าและทำให้ปุ่มเรียงเดี่ยว... ซึ่งดีแล้ว!
+         */
+         /* grid-template-columns: 1fr 2fr; */ /* (Original - Not needed) */
+         gap: 0.75rem;
+         margin-top: 1.5rem;
+    }
+
+    /* * คืนค่าปุ่มคิดเลขให้เป็น 1:1
+     */
+    .calc-btn {
+        aspect-ratio: 1 / 1;
+        height: auto;
+    }
+    .calc-btn.zero {
+        grid-column: 1 / 3;
+        aspect-ratio: auto;
+    }
+    .calc-btn.enter {
+        grid-column: 4 / 5;
+        grid-row: 4 / 6;
+        height: auto;
+        aspect-ratio: auto;
+    }
+
+    /* * คืนค่าการเลื่อนหน้าจอ
+     */
+    html, body {
+        height: auto;
+        overflow: auto !important;
+    }
+    .app-container {
+        height: auto;
+        display: flex; /* คืนค่าการจัดกลาง */
+        padding: 1rem;
+    }
+    #cashier-view.card {
+        height: auto;
+        border-radius: var(--radius-xl);
+        padding: 2.5rem; /* คืนค่า padding */
+        display: block; 
+    }
+    
+    /* * ทับซ้อนโค้ดเก่าของมึง (จำเป็น)
+     */
+    .card { padding: 1.5rem !important; }
+    .calc-btn { font-size: 1.5rem; border-radius: 0.75rem; }
+    .display-main { font-size: 2rem; }
+    .display-screen { height: 80px; }
+    .calculator-grid { gap: 0.5rem; }
+    .action-buttons-container { grid-template-columns: 1fr !important; }
+}
+
+
+/* * 2. 🔥 TABLET PORTRAIT / POS (640px - 1199px) 🔥
+ * (Layout 2 คอลัมน์, *ไม่เลื่อน*)
+ * (จอ 800px ของมึงจะใช้คอันนี้)
+ */
+@media (min-width: 640px) and (max-width: 1199px) {
+    /* (โค้ดข้างในเหมือนเดิมทุกอย่าง ไม่ต้องแตะ) */
+
+    html, body {
+        height: 100vh;
+        height: 100dvh; 
+        overflow: hidden !important;
+    }
+    
+    .app-container {
+        height: 100%;
+        overflow: hidden;
+        padding: 0;
+        display: block;
+    }
+    
+    #cashier-view.card {
+        max-width: 100%;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        border-radius: 0;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: none;
+        gap: 1rem;
+    }
+    
+    #cashier-view .cashier-header {
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+    
+    /* 🔥 Grid 2 Columns */
+    .cashier-grid-container {
+        display: grid;
+        grid-template-columns: 1fr 340px; 
+        grid-template-rows: auto minmax(0, 1fr); /* แถวบน: auto | แถวล่าง: ยืดเต็ม */
+        grid-template-areas:
+            "customer payment"
+            "calculator payment";
+        gap: 1rem;
+        flex-grow: 1;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+    
+    /* Col 1, Row 1: Customer */
+    .cashier-left-panel {
+        grid-area: customer;
+        min-height: 0;
+        overflow-y: auto; /* เลื่อนเฉพาะส่วนแท็บลูกค้า */
+    }
+    
+    /* Col 1, Row 2: Calculator (Now Manual Entry) */
+    .cashier-calculator-panel {
+        grid-area: calculator;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+    }
+    .cashier-calculator-panel .calculator-display-wrapper {
+        flex-shrink: 0;
+    }
+    
+    /* (โค้ดเก่า .calculator-container และ .calculator-grid ไม่ถูกใช้แล้ว แต่ทิ้งไว้ก็ไม่พัง) */
+    .cashier-calculator-panel .calculator-container {
+        flex-grow: 1;
+        height: 100%;
+        overflow-y: auto; /* ✨ เพิ่ม: เผื่อฟอร์มมันยาวในอนาคต */
+    }
+    .cashier-calculator-panel .calculator-grid {
+        height: 100%;
+    }
+    
+    /* Col 2 (Full Height): Payment */
+    .cashier-payment-panel {
+        grid-area: payment;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    .cashier-payment-panel .payment-section {
+       /* (สไตล์นี้ไม่ได้ใช้แล้ว เพราะ section นี้ถูกย้ายไป HTML ใหม่) */
+    }
+    .cashier-payment-panel .action-buttons-container {
+        flex-shrink: 0;
+        /* margin-top: 1rem; */ /* <-- ลบอันเก่า */
+        display: grid;
+        grid-template-columns: 1fr; /* ให้ปุ่มเรียงแนวตั้ง */
+        gap: 0.5rem;
+        
+        /* ✨ แก้ไข: ดันปุ่มไปล่างสุด */
+        margin-top: auto; 
+    }
+    .cashier-payment-panel .error-message {
+        flex-shrink: 0;
+        margin-top: 1rem;
+    }
+    
+    /* ( .calc-btn rules are removed from here )
+      ( ลบก้อน .calc-btn, .calc-btn.zero, .calc-btn.enter ทิ้งจากตรงนี้)
+    */
+}
+
+/* ============================================
+    ✨ NEW: Re-adding Quick Cash Styles
+    (ก้อนนี้คือที่ต้องเพิ่มกลับเข้าไป)
+    ============================================ */
+.quick-cash-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.quick-cash-grid .btn {
+    font-size: 1rem;
+    padding: 0.75rem 0.5rem;
+}
+
+/* ============================================
+    ✨ NEW: Mini-Calculator (Numpad) Styles
+    (นี่คือก้อนที่มึงต้องรื้อ/เปลี่ยน)
+    ============================================ */
+
+/* ▼▼▼ 🔥 นี่คือ CSS ที่มึงต้อง "แทนที่" ของเก่า 🔥 ▼▼▼ */
+
+/* จอเครื่องคิดเลขจิ๋ว (ที่ตอนนี้เป็นพระเอก) */
+.mini-calc-history-display {
+    display: block;
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    height: 52px; /* ความสูงกำลังดี (สูงกว่า input นิดหน่อย) */
+    margin-bottom: 0.5rem;
+    
+    /* --- (หัวใจของ "แนวนอน") --- */
+    overflow-x: auto;  /* สโครลแนวนอนได้ */
+    overflow-y: hidden; /* ห้ามสโครลแนวตั้ง */
+    white-space: nowrap; /* ห้ามตัดคำขึ้นบรรทัดใหม่ */
+    scroll-behavior: smooth; /* เลื่อนนิ่มๆ */
+
+    /* --- (หน้าตาตัวอักษร) --- */
+    font-size: 1.5rem; /* ตัวใหญ่ๆ ชัดๆ */
+    font-weight: 700;
+    text-align: right; /* ให้มันเลื่อนจากขวาไปซ้าย */
+    color: var(--text-dark);
+}
+
+/* (กูลบ .calc-history-item กับ .calc-history-total ทิ้งให้แล้ว) */
+
+/* แผงปุ่ม Numpad (Layout ใหม่ 5 แถว) */
+.mini-calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* แถว 5 แถว จะถูกกำหนดโดย aspect-ratio ของปุ่ม */
+    gap: 0.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem; /* เว้นระยะก่อนถึงช่อง "รับเงินมา" */
+}
+
+/* สไตล์ปุ่ม */
+.mini-calc-grid .btn.calc-key {
+    padding: 0.75rem 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    aspect-ratio: 1 / 1; /* ทำให้ปุ่มจัตุรัส */
+    height: auto;
+}
+
+/* ปุ่ม 0 (ยาว 2 ช่อง) */
+.mini-calc-grid .btn.calc-key.zero {
+    grid-column: 1 / 3;
+    aspect-ratio: auto;
+}
+
+/* 🔥 NEW: ปุ่ม = (ยาว 2 แถว) */
+.mini-calc-grid .btn.calc-key.equals {
+    grid-row: span 2;
+    aspect-ratio: auto;
+    height: auto;
+    font-size: 1.5rem; /* ขยาย = ให้ใหญ่หน่อย */
+}
+
+/* ปุ่ม Operators (C, +, ⌫, และตัวใหม่ๆ) */
+.mini-calc-grid .btn.calc-key.op {
+    background-color: var(--bg-interactive);
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+/* ปุ่ม C (สีแดง) */
+.mini-calc-grid .btn.calc-key.op[data-key="C"] {
+    color: var(--danger-color);
+}
+
+/* ปุ่ม Backspace (⌫) */
+.mini-calc-grid .btn.calc-key.op[data-key="backspace"] {
+    font-size: 1.5rem; /* ทำให้ ⌫ ตัวใหญ่ๆ */
+}
+
+/* ปุ่ม = (สีหลัก) */
+.mini-calc-grid .btn.calc-key.op[data-key="="] {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* ============================================
+    📱 SAMSUNG TAB A9 OPTIMIZATION (PORTRAIT)
+    ============================================ */
+@media (min-width: 768px) and (max-width: 850px) {
+    :root {
+        --spacing-unit: 1.25rem;
+    }
+    
+    .card {
+        padding: 2rem !important;
+        max-width: 95% !important;
+    }
+    
+    #cashier-view.card {
+        padding: 1rem !important;
+    }
+    
+    .cashier-grid-container {
+        grid-template-columns: 1fr 320px !important;
+        gap: 0.75rem !important;
+    }
+    
+    .mini-calc-grid .btn.calc-key {
+        font-size: 1.5rem !important;
+    }
+    
+    .amount-due-box .value {
+        font-size: 3.5rem !important;
+    }
+    
+    .btn {
+        padding: 1.1rem 1.25rem !important;
+        font-size: 1.1rem !important;
+    }
+}
+
+/* ============================================
+    🌀 ADVANCED LOADERS & PROGRESS BARS
+    ============================================ */
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--bg-light);
+    border-bottom-color: var(--primary-color);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Global Progress Bar */
+#global-progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(99, 102, 241, 0.1);
+    z-index: 9999;
+}
+
+#global-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--primary-gradient);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    transition: width 0.3s ease;
+}
+
+/* Pulse animation for loading items */
+.loading-pulse {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Version Display Unified Style */
+.version-display {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-weight: 600;
+    z-index: 100;
+    background: rgba(255,255,255,0.7);
+    padding: 2px 8px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+}

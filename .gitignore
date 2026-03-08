@@ -1,0 +1,27 @@
+# Credentials & Config
+*.json
+.credentials/
+.openclaw/
+.vercel/
+.clawhub/
+
+# Skills (local)
+skills/
+
+# State files
+memory/heartbeat-state.json
+
+# Node_modules (if any)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+*.tar.gz
+.vercel
+node_modules/
+.env
+.env.local
+.git
+
+node_modules/

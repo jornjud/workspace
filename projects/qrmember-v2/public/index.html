@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บัตรสมาชิกร้านเจ๊สุเขาค่าย</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎁</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-main">
+
+<div id="global-progress-container" class="hidden">
+    <div id="global-progress-bar"></div>
+</div>
+
+<div id="app" class="app-container">
+    
+    <main id="loading-view" class="card text-center">
+        <div class="loader"></div>
+        <p class="mt-4 text-light">กำลังโหลด...</p>
+    </main>
+
+    <main id="auth-view" class="card hidden">
+        <div id="login-form">
+            <header class="card__header">
+                <h1>QrMember JsuShop</h1>
+                <p>เข้าสู่ระบบด้วยเบอร์โทรศัพท์</p>
+            </header>
+            <input type="tel" id="login-tel" placeholder="เบอร์โทรศัพท์ (08xxxxxxxx)" class="input-field" autocomplete="username">
+            <div class="password-container">
+                <input type="password" id="login-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" class="input-field" autocomplete="current-password">
+                <button type="button" id="toggle-login-password" class="password-toggle-btn" aria-label="แสดง/ซ่อนรหัสผ่าน">
+                    <svg id="eye-icon-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                    </svg>
+                    <svg id="eye-slash-icon-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="hidden" viewBox="0 0 16 16">
+                        <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                        <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+                    </svg>
+                </button>
+            </div>
+            <button id="login-btn" class="btn btn--primary"><span class="btn-text">เข้าสู่ระบบ</span></button>
+            <p id="login-error" class="error-message"></p>
+            <div class="flex justify-between items-center text-sm mt-4">
+                 <button id="forgot-password-btn" class="font-semibold text-medium hover:underline" style="all: unset; cursor: pointer;">ลืมรหัสผ่าน?</button>
+            </div>
+            <div class="text-center mt-8 pt-4" style="border-top: 1px solid var(--border-color);">
+                <p class="text-medium">ยังไม่มีบัญชี?</p>
+                <p class="font-semibold" style="color: var(--primary-color);">สมัครสมาชิกได้ที่ร้านกับข้าวเจ๊สุ สี่แยกเขาค่าย</p>
+            </div>
+        </div>
+    </main>
+
+    <main id="customer-dashboard-view" class="card hidden">
+        <header class="dashboard-header">
+             <div>
+                <div class="flex items-center gap-2">
+                    <h1 id="customer-name-display" class="dashboard-header__name">...</h1>
+                    <button id="edit-name-btn" title="แก้ไขชื่อ" class="btn btn--icon" aria-label="แก้ไขชื่อ">✏️</button>
+                </div>
+                <p id="customer-tel-display" class="dashboard-header__tel">...</p>
+                 <span id="customer-tier-display" class="tier-badge">...</span>
+            </div>
+             <button id="customer-logout-btn" title="ออกจากระบบ" class="btn btn--icon" aria-label="ออกจากระบบ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16" style="color: #64748b;"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+            </button>
+        </header>
+        
+        <div class="dashboard-main-content">
+            <div class="points-display-wrapper">
+                <div class="points-display">
+                    <p class="points-display__label">แต้มสะสมปัจจุบัน</p>
+                    <p id="current-points" class="points-display__value">0</p>
+                    <p id="purchase-remainder-display" class="points-display__remainder" title="ยอดเงินที่เหลือจากการคำนวณแต้มครั้งล่าสุด จะถูกนำไปรวมกับการใช้จ่ายครั้งถัดไป">ยอดสะสม: 0.00 บ.</p>
+                </div>
+            </div>
+    
+            <div class="qrcode-wrapper">
+                <p class="text-center font-medium mb-2">QR Code ของคุณ</p>
+                <div class="qrcode-container">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+                <p class="text-xs text-medium mt-2 text-center">แสดง QR Code นี้ให้พนักงาน</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 mt-6">
+            <button id="go-to-redeem-btn" class="btn btn--secondary">🎁 ดูของรางวัลและแลกแต้ม</button>
+            <button id="go-to-history-btn" class="btn btn--tertiary">📜 ประวัติการทำรายการ</button>
+        </div>
+    </main>
+    
+    <main id="redeem-view" class="card hidden">
+        <header class="card__header">
+            <h1 style="color: #f59e0b;">🏆 ของรางวัล</h1>
+            <div class="redeem-points-display">
+                <p>แต้มคงเหลือ</p>
+                <span id="redeem-current-points">0</span>
+            </div>
+        </header>
+
+        <div class="controls-container">
+            <input type="search" id="redeem-search-input" placeholder="ค้นหาของรางวัล..." class="input-field" style="flex-grow: 1;">
+            <select id="redeem-sort-select" class="input-field" style="width: auto;">
+                <option value="points_asc">แต้ม: น้อยไปมาก</option>
+                <option value="points_desc">แต้ม: มากไปน้อย</option>
+                <option value="name_asc">ชื่อ: ก ไป ฮ</option>
+            </select>
+        </div>
+        
+        <div class="text-center mb-4">
+            <button id="show-conditions-btn" class="conditions-link">ⓘ เงื่อนไขการสะสมแต้ม</button>
+        </div>
+        <div id="rewards-list" class="rewards-list-container"></div>
+        <div id="redeem-pagination" class="pagination-container"></div>
+        <button id="redeem-back-button" class="btn btn--tertiary mt-6">&larr; กลับไปหน้าหลัก</button>
+    </main>
+
+    <main id="history-view" class="card card--medium hidden">
+        <header class="card__header">
+            <h1>📜 ประวัติการทำรายการ</h1>
+            <p>ดูการเคลื่อนไหวแต้มสะสมของคุณ</p>
+        </header>
+        <div id="transaction-list-container">
+            </div>
+        <button id="history-back-button" class="btn btn--tertiary mt-6">&larr; กลับไปหน้าหลัก</button>
+    </main>
+
+</div>
+
+<div id="app-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div id="modal-icon" class="text-5xl mb-4"></div>
+        <h3 id="modal-title" class="text-2xl font-bold mb-2">สำเร็จ!</h3>
+        <p id="modal-message" class="text-slate-600 mb-6"></p>
+        <button id="modal-close-btn" class="btn btn--primary">ตกลง</button>
+    </div>
+</div>
+
+<div id="conditions-modal" class="modal-backdrop hidden">
+    <div class="modal-content text-left">
+        <h3 class="text-2xl font-bold mb-4 text-center">เงื่อนไขการสะสมแต้ม</h3>
+        <div class="conditions-content">
+            <p><strong>หลักเกณฑ์:</strong></p>
+            <ul>
+                <li>✅ ทุกๆ การใช้จ่าย <strong>100 บาท</strong> จะได้รับ <strong>1 แต้ม</strong></li>
+                <li>💰 ยอดใช้จ่ายที่ไม่ครบ 100 บาท จะถูกเก็บเป็น "ยอดสะสม" สำหรับคำนวณในการซื้อครั้งถัดไป</li>
+            </ul>
+            <hr class="my-4">
+            <p><strong>ตัวอย่างการคำนวณแต้ม:</strong></p>
+            <p><strong>ครั้งที่ 1:</strong></p>
+            <ul>
+                <li>ซื้อสินค้า <strong>150 บาท</strong></li>
+                <li>คุณจะได้รับ: <strong class="text-green-600">1 แต้ม</strong></li>
+                <li>ยอดสะสมคงเหลือ: <strong class="text-indigo-600">50 บาท</strong></li>
+            </ul>
+             <p class="mt-2"><strong>ครั้งที่ 2 (ซื้อครั้งถัดไป):</strong></p>
+            <ul>
+                <li>ซื้อสินค้าเพิ่ม <strong>80 บาท</strong></li>
+                <li>ยอดสำหรับคำนวณ: 80 บาท + 50 บาท (ยอดสะสมเก่า) = <strong>130 บาท</strong></li>
+                <li>คุณจะได้รับ: <strong class="text-green-600">1 แต้ม</strong></li>
+                <li>ยอดสะสมคงเหลือใหม่: <strong class="text-indigo-600">30 บาท</strong></li>
+            </ul>
+            </div>
+        <button id="close-conditions-btn" class="btn btn--primary w-full mt-6">เข้าใจแล้ว</button>
+    </div>
+</div>
+
+<div id="forgot-password-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div class="text-5xl mb-4">🔑</div>
+        <h3 class="text-2xl font-bold mb-2">ลืมรหัสผ่าน?</h3>
+        <p class="text-slate-600 mb-6">กรุณาติดต่อพนักงานที่ร้านเพื่อขอรับรหัสผ่านชั่วคราวสำหรับเข้าสู่ระบบ</p>
+        <button id="close-forgot-password-btn" class="btn btn--primary">เข้าใจแล้ว</button>
+    </div>
+</div>
+
+<div id="edit-name-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-6">แก้ไขชื่อที่แสดง</h3>
+        <div class="text-left">
+            <div>
+                <label for="edit-customer-name-input" class="input-label">ชื่อใหม่</label>
+                <input type="text" id="edit-customer-name-input" placeholder="กรอกชื่อใหม่ของคุณ" class="input-field">
+            </div>
+        </div>
+        <p id="edit-name-error" class="error-message mt-4"></p>
+        <div class="flex gap-3 mt-8">
+            <button id="cancel-edit-name-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="save-name-btn" class="btn btn--primary flex-1"><span class="btn-text">บันทึก</span></button>
+        </div>
+    </div>
+</div>
+
+
+<span id="app-version" class="version-display"></span>
+<script src="version.js" defer></script>
+<script src="customer.js" type="module" defer></script>
+</body>
+</html>

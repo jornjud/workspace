@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการระบบ (พนักงาน)</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-main">
+
+<div id="global-progress-container" class="hidden">
+    <div id="global-progress-bar"></div>
+</div>
+
+<div id="app" class="app-container">
+
+    <main id="loading-view" class="card text-center">
+        <div class="loader"></div>
+        <p class="mt-4 text-light">กำลังโหลด...</p>
+    </main>
+
+    <main id="staff-login-view" class="card hidden">
+        <header class="card__header">
+            <h1>Staff Panel</h1>
+            <p>กรุณาเข้าสู่ระบบสำหรับพนักงาน</p>
+        </header>
+        <input type="email" id="staff-email" placeholder="อีเมล" class="input-field" autocomplete="email">
+        <input type="password" id="staff-password" placeholder="รหัสผ่าน" class="input-field" autocomplete="current-password">
+        <button id="staff-login-btn" class="btn btn--primary"><span class="btn-text">เข้าสู่ระบบ</span></button>
+        <p id="staff-login-error" class="error-message"></p>
+    </main>
+    
+    <main id="staff-dashboard-view" class="card hidden">
+        <header class="dashboard-header mb-6">
+            <div>
+                <h1>เครื่องบันทึกแต้ม</h1>
+                <p id="staff-email-display" class="text-medium">...</p>
+            </div>
+            <button id="staff-logout-btn" title="ออกจากระบบ" class="btn btn--icon" aria-label="ออกจากระบบ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16" style="color: #64748b;">
+                  <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                  <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                </svg>
+            </button>
+        </header>
+
+        <a href="cashier.html" class="btn btn--secondary mb-4">🛒 เปิดเครื่องคิดเงิน</a>
+
+        <button id="start-scan-btn" class="btn btn--tertiary">📷 สแกน QR Code</button>
+
+        <div id="scanner-container" class="my-4 hidden">
+            <div id="qr-reader" class="w-full"></div>
+            <p id="scanner-status" class="text-center text-sm text-medium mt-2"></p>
+            <button id="stop-scan-btn" class="btn btn--tertiary mt-2">หยุดสแกน</button>
+        </div>
+
+        <p class="text-center font-semibold my-4">หรือ</p>
+
+        <div class="search-wrapper">
+            <input type="search" id="customer-identifier" placeholder="พิมพ์ชื่อ หรือ เบอร์โทรลูกค้า..." class="input-field mb-2" autocomplete="off">
+            <div id="live-search-results"></div>
+        </div>
+        
+        <section id="staff-customer-detail" class="customer-detail-box hidden">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p><strong>ลูกค้า:</strong> <span id="staff-detail-name">...</span></p>
+                    <p><strong>แต้ม:</strong> <span id="staff-detail-points" class="font-bold text-green-600">0</span></p>
+                    <p><strong>ยอดสะสม:</strong> <span id="staff-detail-remainder" class="font-bold text-blue-600">0.00</span> บ.</p>
+                    <div class="flex items-center gap-2">
+                        <p style="margin:0;"><strong>รหัส:</strong> <span id="staff-detail-password" class="font-bold text-red-600">******</span></p>
+                        <button id="toggle-password-visibility" class="btn btn--icon" aria-label="แสดงรหัสผ่าน">👁️</button>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2" style="align-items: flex-end;">
+                     <button id="edit-customer-btn" class="btn btn--tertiary btn--auto btn--sm" aria-label="แก้ไขข้อมูลลูกค้า">✏️ แก้ไข</button>
+                     <button id="clear-customer-btn" class="btn btn--danger btn--auto btn--sm">เปลี่ยน</button>
+                </div>
+            </div>
+            <button id="view-history-btn" class="btn btn--tertiary w-full mt-4">📜 ดูประวัติ</button>
+        </section>
+
+        <section id="staff-action-area" class="mt-4 pt-4 border-t hidden">
+                <div class="action-tabs" id="points-action-tabs">
+                    <button class="tab-btn active" data-tab="add-points-tab">➕ เพิ่มแต้ม</button>
+                    <button class="tab-btn" data-tab="redeem-points-tab">🎁 แลกรางวัล</button>
+                    <button class="tab-btn" data-tab="adjust-points-tab">✏️ ปรับแต้ม</button>
+					<button class="tab-btn" data-tab="adjust-purchase-tab">💰 ปรับยอดซื้อ</button>
+                </div>
+            
+            <div id="add-points-tab" class="tab-content active">
+			<div class="mb-4 p-3 bg-slate-100 rounded-lg">
+				<label for="backdate-timestamp" class="input-label font-bold text-indigo-600">📅 บันทึกย้อนหลัง (ไม่จำเป็น)</label>
+				<p class="text-xs text-medium mb-2">*หากไม่เลือก จะบันทึกเป็นเวลาปัจจุบัน*</p>
+				<div class="flex gap-2">
+					<input type="date" id="backdate-timestamp" class="input-field" style="font-size: 1rem; padding: 0.75rem 1rem;">
+					<button id="clear-backdate-btn" class="btn btn--tertiary btn--sm" style="padding: 0 1rem;" title="ล้างวันที่">วันนี้</button>
+				</div>
+			</div>
+                <label for="purchase-amount" class="input-label">ยอดซื้อ (บาท)</label>
+                <input type="number" id="purchase-amount" placeholder="เช่น 1250" class="input-field" min="0">
+                
+                <div id="points-calculation-breakdown" class="hidden text-sm text-left bg-indigo-50 p-3 rounded-lg mb-4" style="line-height: 1.6;">
+                    <p>ยอดสะสมครั้งก่อน: <span id="calc-remainder" class="font-semibold">0.00</span> บาท</p>
+                    <p>ยอดสำหรับคำนวณ: <span id="calc-total" class="font-semibold">0.00</span> บาท</p>
+                    <p class="mt-1 text-base font-bold text-center border-t border-b py-2 my-2 border-indigo-200">จะได้รับ <span id="points-to-add" class="font-bold text-indigo-600 text-xl">0</span> แต้ม</p>
+                    <p class="text-xs text-slate-500">ยอดสะสมใหม่: <span id="calc-new-remainder" class="font-semibold">0.00</span> บาท</p>
+                </div>
+                
+                <button id="add-points-btn" class="btn btn--success w-full"><span class="btn-text">ยืนยันการเพิ่มแต้ม</span></button>
+            </div>
+
+            <div id="redeem-points-tab" class="tab-content">
+                <div class="controls-container">
+                    <input type="search" id="redeem-search-input" placeholder="ค้นหาของรางวัล..." class="input-field">
+                    <select id="staff-redeem-sort-select" class="input-field" style="width: auto;">
+                        <option value="points_asc">แต้ม: น้อยไปมาก</option>
+                        <option value="points_desc">แต้ม: มากไปน้อย</option>
+                        <option value="name_asc">ชื่อ: ก ไป ฮ</option>
+                    </select>
+                </div>
+                <div id="staff-rewards-list" class="rewards-list-container mt-4"></div>
+                <div id="redeem-pagination" class="pagination-container"></div>
+            </div>
+            
+            <div id="adjust-points-tab" class="tab-content">
+                <label for="adjustment-points" class="input-label">จำนวนแต้มที่ต้องการปรับ</label>
+                <input type="number" id="adjustment-points" placeholder="ใส่ค่าบวกเพื่อเพิ่ม, ค่าลบเพื่อลด" class="input-field">
+                <label for="adjustment-reason" class="input-label">เหตุผล (จำเป็น)</label>
+                <input type="text" id="adjustment-reason" placeholder="เช่น ชดเชยแต้ม, ของขวัญพิเศษ" class="input-field">
+                <button id="adjust-points-btn" class="btn btn--primary w-full"><span class="btn-text">ยืนยันการปรับแต้ม</span></button>
+            </div>
+			
+			<div id="adjust-points-tab" class="tab-content">
+                </div>
+            
+            <div id="adjust-purchase-tab" class="tab-content">
+                <p class="text-sm text-medium mb-4">ใช้สำหรับคืนสินค้า, เปลี่ยนสินค้า, หรือแก้ไขยอดเงินย้อนหลัง (จะมีผลกับยอดขายและแต้มสะสม)</p>
+                <label for="purchase-adjustment-amount" class="input-label">ยอดเงินที่ต้องการปรับ (บาท)</label>
+                <input type="number" id="purchase-adjustment-amount" placeholder="เช่น -200 (คืนของ) หรือ 50 (คิดเงินขาด)" class="input-field">
+                <label for="purchase-adjustment-reason" class="input-label mt-4">เหตุผล (จำเป็น)</label>
+                <input type="text" id="purchase-adjustment-reason" placeholder="เช่น คืนสินค้า, เปลี่ยนไซส์" class="input-field">
+                <button id="adjust-purchase-btn" class="btn btn--warning w-full mt-6"><span class="btn-text">ยืนยันการปรับยอดซื้อ</span></button>
+            </div>
+            </section>
+        </section>
+        <p id="staff-message" class="error-message"></p>
+        <div class="mt-6" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <button id="manage-customers-btn" class="btn btn--tertiary">👤 จัดการลูกค้า</button>
+            <button id="manage-rewards-btn" class="btn btn--tertiary">⚙️ จัดการของรางวัล</button>
+            <button id="manage-analytics-btn" class="btn btn--tertiary" style="grid-column: 1 / -1;">📊 ดูสรุปข้อมูล</button>
+            <button id="cleanup-history-btn" class="btn btn--danger" style="grid-column: 1 / -1;"><span class="btn-text">🗑️ ลบประวัติเก่า</span></button>
+		</div>
+    </main>
+
+    <main id="staff-customer-list-view" class="card card--wide hidden">
+        <header class="card__header">
+            <h1>รายชื่อลูกค้าทั้งหมด</h1>
+            <button id="customers-back-to-main-btn" class="btn btn--tertiary" style="margin-top: 1rem;">กลับไปหน้าหลัก</button>
+        </header>
+        <div class="controls-container">
+            <input type="search" id="customer-search-input" placeholder="ค้นหาชื่อ หรือ เบอร์โทร..." class="input-field" style="flex-grow: 1;">
+            <select id="sort-select" class="input-field" style="width: auto;">
+                <option value="date_desc">เรียงตาม: สมัครล่าสุด</option>
+                <option value="date_asc">เรียงตาม: สมัครก่อน</option>
+                <option value="points_desc">เรียงตาม: แต้มมากสุด</option>
+                <option value="points_asc">เรียงตาม: แต้มมีน้อยสุด</option>
+            </select>
+            <button id="add-new-customer-btn" class="btn btn--primary btn--auto">➕ สมัครสมาชิกใหม่</button>
+        </div>
+        
+        <div class="table-wrapper">
+            <table id="customer-list-table">
+                <thead>
+                    <tr>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>เบอร์โทร</th>
+                        <th>แต้ม</th>
+                        <th>วันที่สมัคร</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-list-container"></tbody>
+            </table>
+        </div>
+        <div id="customer-list-pagination" class="pagination-container"></div>
+        <button id="customers-back-to-main-btn-bottom" class="btn btn--tertiary mt-6">กลับไปหน้าหลัก</button>
+    </main>
+
+    <main id="staff-rewards-view" class="card hidden">
+        <header class="card__header">
+            <h1>จัดการของรางวัล</h1>
+            <button id="rewards-back-to-scanner-btn" class="btn btn--tertiary" style="margin-top: 1rem;">กลับไปหน้าหลัก</button>
+        </header>
+        
+        <div class="controls-container">
+            <input type="search" id="rewards-admin-search-input" placeholder="ค้นหาของรางวัล..." class="input-field" style="flex-grow: 1;">
+            <select id="rewards-admin-sort-select" class="input-field" style="width: auto;">
+                <option value="points_asc">แต้ม: น้อยไปมาก</option>
+                <option value="points_desc">แต้ม: มากไปน้อย</option>
+                <option value="name_asc">ชื่อ: ก ไป ฮ</option>
+            </select>
+        </div>
+
+        <div id="rewards-admin-list" style="display: flex; flex-direction: column; gap: 0.75rem;" class="my-6"></div>
+        <div id="rewards-admin-pagination" class="pagination-container"></div>
+
+		<a href="calculator.html" target="_blank" class="btn btn--secondary mt-6 mb-2">🧮 เปิดเครื่องคำนวณแต้ม</a>
+        <button id="add-reward-btn" class="btn btn--primary">เพิ่มของรางวัลใหม่</button>
+        <button id="rewards-back-to-scanner-btn-bottom" class="btn btn--tertiary mt-2">กลับไปหน้าหลัก</button>
+    </main>
+    
+    <main id="staff-history-view" class="card card--medium hidden">
+        <header class="card__header">
+            <h1>📜 ประวัติการทำรายการ</h1>
+            <p id="history-customer-name" class="text-medium">ดูการเคลื่อนไหวแต้มสะสมของ...</p>
+            <button id="history-back-button" class="btn btn--tertiary mt-4">&larr; กลับไปหน้าหลัก</button>
+        </header>
+        <div id="transaction-list-container"></div>
+        <button id="history-back-button-bottom" class="btn btn--tertiary mt-6">&larr; กลับไปหน้าหลัก</button>
+    </main>
+
+    <main id="staff-analytics-view" class="card card--wide hidden">
+        <header class="card__header">
+            <h1>📊 แดชบอร์ดสรุปข้อมูล</h1>
+            <p class="text-medium">ภาพรวมของระบบสมาชิกและยอดขาย</p>
+            <button id="analytics-back-to-main-btn" class="btn btn--tertiary mt-4">กลับไปหน้าหลัก</button>
+        </header>
+
+        <nav class="action-tabs">
+            <button class="analytics-tab-btn active" data-tab="sales-analytics-tab" aria-controls="sales-analytics-tab">💰 สรุปยอดขาย</button>
+            <button class="analytics-tab-btn" data-tab="member-analytics-tab" aria-controls="member-analytics-tab">👥 สรุปข้อมูลสมาชิก</button>
+        </nav>
+
+        <div id="analytics-content">
+             <div id="sales-analytics-tab" class="tab-content active" role="tabpanel">
+                <div id="date-range-picker" class="controls-container mt-6" style="background-color: #f8fafc; padding: 1rem; border-radius: 1rem;">
+                    <div style="flex-grow: 1;">
+                        <label for="start-date" class="input-label mb-1">จากวันที่</label>
+                        <input type="date" id="start-date" class="input-field">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <label for="end-date" class="input-label mb-1">ถึงวันที่</label>
+                        <input type="date" id="end-date" class="input-field">
+                    </div>
+                    <button id="search-date-range-btn" class="btn btn--primary btn--auto" style="margin-top: auto;">ค้นหา</button>
+                </div>
+                <div id="sales-summary-content"></div>
+             </div>
+             <div id="member-analytics-tab" class="tab-content" role="tabpanel"></div>
+        </div>
+		<button id="backfill-sheet-btn" class="btn btn--primary mt-6" style="grid-column: 1 / -1;"><span class="btn-text">🌀 ส่งข้อมูลเก่าทั้งหมดไปที่ Google Sheet</span></button>
+        <button id="export-sales-btn" class="btn btn--secondary mt-2" style="grid-column: 1 / -1;"><span class="btn-text">📈 ดาวน์โหลดรายงานยอดขายทั้งหมด (.csv)</span></button>
+        <button id="analytics-back-to-main-btn-bottom" class="btn btn--tertiary mt-6">กลับไปหน้าหลัก</button>
+    </main>
+
+</div>
+
+<div id="app-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div id="modal-icon" class="text-5xl mb-4"></div>
+        <h3 id="modal-title" class="text-2xl font-bold mb-2">สำเร็จ!</h3>
+        <p id="modal-message" class="text-medium mb-6"></p>
+        <button id="modal-close-btn" class="btn btn--primary">ตกลง</button>
+    </div>
+</div>
+
+<div id="reward-form-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 id="modal-reward-title" class="text-2xl font-bold mb-6">เพิ่ม/แก้ไขของรางวัล</h3>
+        <input type="hidden" id="reward-id">
+        <div class="text-left" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="reward-name" class="input-label">ชื่อของรางวัล</label>
+                <input type="text" id="reward-name" placeholder="เช่น แก้วน้ำ" class="input-field">
+            </div>
+            <div>
+                <label for="reward-points" class="input-label">แต้มที่ใช้แลก</label>
+                <input type="number" id="reward-points" placeholder="เช่น 500" class="input-field" min="0">
+            </div>
+            <div>
+                <label for="reward-stock" class="input-label">จำนวนคงเหลือ</label>
+                <input type="number" id="reward-stock" placeholder="เช่น 50" class="input-field" min="0">
+            </div>
+        </div>
+        <div class="flex gap-3 mt-8">
+            <button id="cancel-reward-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="save-reward-btn" class="btn btn--primary flex-1"><span class="btn-text">บันทึก</span></button>
+        </div>
+    </div>
+</div>
+
+<div id="edit-customer-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-6">แก้ไขข้อมูลลูกค้า</h3>
+        <input type="hidden" id="edit-customer-id">
+        <div class="text-left" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="edit-customer-name" class="input-label">ชื่อลูกค้า</label>
+                <input type="text" id="edit-customer-name" class="input-field">
+            </div>
+            <div>
+                <label for="edit-customer-tel" class="input-label">เบอร์โทรศัพท์</label>
+                <input type="tel" id="edit-customer-tel" class="input-field">
+            </div>
+            <div>
+                <label for="edit-customer-points" class="input-label">แต้มสะสม</label>
+                <input type="number" id="edit-customer-points" class="input-field" min="0">
+            </div>
+            <div>
+                <label for="edit-customer-remainder" class="input-label">ยอดสะสมรอปัด (บาท)</label>
+                <input type="number" id="edit-customer-remainder" class="input-field" min="0" step="0.01" placeholder="เช่น 50.50">
+            </div>
+        </div>
+        <div class="flex gap-3 mt-8">
+            <button id="cancel-edit-customer-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="save-customer-btn" class="btn btn--primary flex-1"><span class="btn-text">บันทึก</span></button>
+        </div>
+    </div>
+</div>
+
+<div id="change-password-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 id="change-password-title" class="text-2xl font-bold mb-6">🔑 เปลี่ยนรหัสผ่าน</h3>
+        <input type="hidden" id="change-password-customer-id">
+        <div class="text-left">
+            <div>
+                <label for="new-password" class="input-label">รหัสผ่านใหม่ (6-16 ตัว)</label>
+                <input type="password" id="new-password" class="input-field" placeholder="กรอกรหัสผ่านที่ลูกค้าต้องการ">
+            </div>
+        </div>
+        <p id="change-password-error" class="error-message"></p>
+        <div class="flex gap-3 mt-8">
+            <button id="cancel-change-password-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="save-new-password-btn" class="btn btn--primary flex-1"><span class="btn-text">บันทึกรหัสใหม่</span></button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div id="confirm-modal-icon" class="text-5xl mb-4"></div>
+        <h3 id="confirm-modal-title" class="text-2xl font-bold mb-2"></h3>
+        <p id="confirm-modal-message" class="text-medium mb-6"></p>
+        <div class="flex gap-3">
+            <button id="confirm-modal-cancel-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="confirm-modal-confirm-btn" class="btn btn--danger flex-1"><span class="btn-text">ยืนยัน</span></button>
+        </div>
+    </div>
+</div>
+
+<div id="add-customer-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 class="text-2xl font-bold mb-6">📝 สมัครสมาชิกให้ลูกค้าใหม่</h3>
+        <div class="text-left" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="add-customer-name" class="input-label">ชื่อ - นามสกุล</label>
+                <input type="text" id="add-customer-name" class="input-field" placeholder="สมชาย ใจดี">
+            </div>
+            <div>
+                <label for="add-customer-tel" class="input-label">เบอร์โทรศัพท์ (ใช้เข้าระบบ)</label>
+                <input type="tel" id="add-customer-tel" class="input-field" placeholder="0812345678">
+            </div>
+            <div>
+                <label for="add-customer-password" class="input-label">ตั้งรหัสผ่าน (6-16 ตัว)</label>
+                <div class="password-container">
+                    <input type="password" id="add-customer-password" class="input-field" placeholder="ลูกค้าจะเป็นคนบอกรหัสที่ต้องการ">
+                    <button type="button" id="toggle-add-password" class="password-toggle-btn" aria-label="แสดงรหัสผ่าน">
+                        <svg id="eye-icon-add" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                        <svg id="eye-slash-icon-add" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="hidden" viewBox="0 0 16 16">
+                            <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/>
+                            <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p id="add-customer-error" class="error-message"></p>
+        <div class="flex gap-3 mt-8">
+            <button id="cancel-add-customer-btn" class="btn btn--tertiary flex-1">ยกเลิก</button>
+            <button id="save-new-customer-btn" class="btn btn--primary flex-1"><span class="btn-text">บันทึกและสมัครสมาชิก</span></button>
+        </div>
+    </div>
+</div>
+
+<span id="app-version" class="version-display"></span>
+<script src="version.js" defer></script>
+<script src="https://unpkg.com/html5-qrcode@2.0.9/dist/html5-qrcode.min.js"></script>
+<script src="staff.js" type="module" defer></script>
+</body>
+</html>
