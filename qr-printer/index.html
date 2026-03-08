@@ -261,10 +261,10 @@
                 <div class="flex-1">
                     <div class="step-label">อัปโหลดรูปภาพ</div>
                     <label for="file-upload" class="cursor-pointer block mt-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg text-center transition-all">
-                        📂 เลือกรูป
+                        📂 อัปโหลด 1 รูป
                     </label>
                     <input id="file-upload" type="file" class="hidden" accept="image/*" multiple>
-                    <div id="upload-status" class="text-xs text-gray-500 mt-1">ยังไม่ได้เลือกรูป</div>
+                    <div id="upload-status" class="text-xs text-gray-500 mt-1">อัปโหลด 1 รูป → จะ copy ไปทุกช่อง</div>
                 </div>
             </div>
 
@@ -286,7 +286,7 @@
         </div>
 
         <div class="mt-3 text-center text-xs text-gray-400">
-            เวอร์ชัน 0.4.1
+            เวอร์ชัน 0.4.2
         </div>
     </div>
 
@@ -427,6 +427,10 @@
                     img.style.display = 'block';
                     empty.style.display = 'none';
                     showProgress(index, 30, 'แสดงตัวอย่างแล้ว...');
+                    
+                    // ✅ อัปเดตปุ่มพิมพ์ทันทีเมื่อรูปแสดงได้ (ไม่ต้องรอ compress)
+                    updatePrintButton();
+                    
                     resolve(objectUrl);
                 };
                 
@@ -499,6 +503,10 @@
         imageCountSelect.addEventListener('change', function() {
             currentCount = parseInt(this.value);
             
+            // อัปเดตข้อความบอกจำนวน
+            const countText = currentCount === 1 ? '1 รูป' : `${currentCount} รูป`;
+            uploadStatus.textContent = `อัปโหลด 1 รูป → จะ copy ไป ${countText}`;
+            
             // แสดง/ซ่อน orientation สำหรับ 1 รูป
             if (currentCount === 1) {
                 orientationSelect.parentElement.style.display = 'block';
@@ -541,26 +549,23 @@
                 isProcessing = true;
                 updateSteps(2, 'processing');
                 
-                const filesToUse = currentCount === 1 
-                    ? [files[0]] 
-                    : files.slice(0, currentCount);
+                const singleFile = files[0]; // ใช้รูปแรกอัปโหลดไปทุกช่อง
                 
-                const fileText = filesToUse.length === 1 
-                    ? '1 รูป' 
-                    : `${filesToUse.length} รูป`;
-                uploadStatus.textContent = `กำลังโหลด ${fileText}...`;
+                // แสดงตัวอย่างดิบก่อน (ทันที) - copy ไปทุกช่อง
+                for (let i = 0; i < currentCount; i++) {
+                    showPreview(singleFile, i);
+                }
                 
-                // แสดงตัวอย่างดิบก่อน (ทันที)
-                const previewPromises = filesToUse.map((file, i) => showPreview(file, i));
-                await Promise.all(previewPromises);
+                // บีบอัดใน background - copy ไปทุกช่อง
+                for (let i = 0; i < currentCount; i++) {
+                    compressImage(singleFile, i);
+                }
                 
-                // บีบอัดใน background
-                const compressPromises = filesToUse.map((file, i) => compressImage(file, i));
-                await Promise.all(compressPromises);
+                const fileText = currentCount === 1 ? '1 รูป' : `${currentCount} รูป`;
+                uploadStatus.textContent = `✅ โหลด ${fileText} เสร็จแล้ว!`;
                 
                 isProcessing = false;
                 updateSteps(2, 'completed');
-                uploadStatus.textContent = `✅ โหลด ${fileText} เสร็จแล้ว!`;
                 updatePrintButton();
             }
         });
@@ -587,7 +592,13 @@
                 printBtn.classList.add('print-ready');
                 printBtn.disabled = false;
                 printBtn.innerHTML = '🖨️ พิมพ์เลย!';
-                updateSteps(3, 'ready');
+                // ✅ แสดง step 3 เป็น completed เมื่อพร้อมพิมพ์
+                step1.classList.remove('active');
+                step1.classList.add('completed');
+                step2.classList.remove('active');
+                step2.classList.add('completed');
+                step3.classList.remove('active');
+                step3.classList.add('completed');
             } else {
                 printBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
                 printBtn.classList.remove('print-ready');
