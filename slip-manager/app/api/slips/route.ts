@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/firebase-admin';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, orderBy, limit, where, getCountFromServer, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const db = getDb();
-    const snapshot = await db.collection('slips').orderBy('createdAt', 'desc').limit(100).get();
-    const slips = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json({ slips, total: slips.length });
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const limitNum = parseInt(searchParams.get('limit') || '100');
+
+    let constraints = [];
+    if (status && status !== 'all') {
+      constraints.push(where('status', '==', status));
+    }
+    constraints.push(orderBy('createdAt', 'desc'));
+    constraints.push(limit(limitNum));
+
+    const q = query(collection(db, 'slips'), ...constraints);
+    const snapshot = await getDocs(q);
+    const slips = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
+    const countQuery = query(collection(db, 'slips'));
+    const totalCount = await getCountFromServer(countQuery);
+
+    return NextResponse.json({ slips, total: totalCount.data().count });
   } catch (error: any) {
     console.error('Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -15,10 +31,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const db = getDb();
     const body = await request.json();
     const slipData = { ...body, status: 'pending', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-    const docRef = await db.collection('slips').add(slipData);
+    const docRef = await addDoc(collection(db, 'slips'), slipData);
     return NextResponse.json({ id: docRef.id, message: 'Created' }, { status: 201 });
   } catch (error: any) {
     console.error('Error:', error);

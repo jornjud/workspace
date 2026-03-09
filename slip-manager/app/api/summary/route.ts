@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/firebase-admin';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export async function GET() {
   try {
-    const db = getDb();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
 
-    const allSnap = await db.collection('slips').get();
-    const todaySnap = await db.collection('slips').where('date', '==', today).get();
-    const monthSnap = await db.collection('slips').where('date', '>=', monthStart).get();
+    const allSnap = await getDocs(query(collection(db, 'slips')));
+    const todaySnap = await getDocs(query(collection(db, 'slips'), where('date', '==', today)));
+    const monthSnap = await getDocs(query(collection(db, 'slips'), where('date', '>=', monthStart)));
 
     const allSlips = allSnap.docs.map(d => d.data());
     const todaySlips = todaySnap.docs.map(d => d.data());
