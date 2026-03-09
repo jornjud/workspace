@@ -116,7 +116,7 @@
 - **Purpose:** ระบบบันทึกสลิปเงินเข้า + Dashboard
 - **Tech:** Next.js + Firebase Firestore + Vercel
 - **URL:** https://slip-manager-sooty.vercel.app
-- **Status:** Deployed, รอสร้าง Firestore Collection
+- **Status:** ✅ พร้อมใช้งาน - บันทึกไปแล้ว 8 รายการ
 
 ---
 
