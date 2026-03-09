@@ -11,6 +11,7 @@ import {
 } from "@/lib/phones-firestore";
 
 const ADMIN_PASSWORD = "sumax298298";
+const APP_VERSION = "0.2.1";
 
 export default function AdminPage() {
   const [phones, setPhones] = useState<Phone[]>([]);
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const [showHidden, setShowHidden] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
+    code: "",
     model: "",
     storage: "",
     color: "",
@@ -66,6 +68,7 @@ export default function AdminPage() {
   const handleEdit = (phone: Phone) => {
     setEditingPhone(phone);
     setFormData({
+      code: phone.code || "",
       model: phone.model,
       storage: phone.storage,
       color: phone.color,
@@ -85,6 +88,7 @@ export default function AdminPage() {
     try {
       setSaving(true);
       await updatePhone(editingPhone.id, {
+        code: formData.code,
         model: formData.model,
         storage: formData.storage,
         color: formData.color,
@@ -126,6 +130,7 @@ export default function AdminPage() {
   const handleCancel = () => {
     setEditingPhone(null);
     setFormData({
+      code: "",
       model: "",
       storage: "",
       color: "",
@@ -199,6 +204,16 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold mb-6">✏️ แก้ไขสินค้า</h2>
             
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">รหัสสินค้า</label>
+                <input
+                  type="text"
+                  value={formData.code}
+                  onChange={(e) => setFormData({...formData, code: e.target.value})}
+                  className="w-full px-4 py-2 border rounded-lg font-mono"
+                  placeholder="SP-001"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">รุ่น</label>
                 <input
@@ -351,6 +366,7 @@ export default function AdminPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">รหัส</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">รุ่น</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">สเปค</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">สี</th>
@@ -364,6 +380,7 @@ export default function AdminPage() {
             <tbody className="divide-y">
               {displayedPhones.map((phone) => (
                 <tr key={phone.id} className={`hover:bg-gray-50 ${phone.hidden ? 'bg-red-50' : ''}`}>
+                  <td className="px-4 py-3 font-mono text-sm">{phone.code || '-'}</td>
                   <td className="px-4 py-3">{phone.model}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{phone.storage}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{phone.color}</td>

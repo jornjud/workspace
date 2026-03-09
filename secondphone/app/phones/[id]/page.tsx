@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getPhoneById, phones } from "@/lib/phones";
 import ImageModal from "./ImageModal";
 
+const APP_VERSION = "0.2.1";
+
 export function generateStaticParams() {
   return phones.map((phone) => ({
     id: phone.id,
@@ -48,7 +50,12 @@ export default function PhoneDetail({ params }: { params: { id: string } }) {
             
             {/* Info */}
             <div>
-              <h2 className="text-3xl font-bold">{phone.model}</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl font-bold">{phone.model}</h2>
+                <span className="text-sm text-gray-500 font-mono bg-gray-100 px-3 py-1 rounded">
+                  {phone.code}
+                </span>
+              </div>
               <p className="text-gray-500 mt-1">{phone.storage} • {phone.color}</p>
               
               <div className="mt-6">
@@ -124,7 +131,7 @@ export default function PhoneDetail({ params }: { params: { id: string } }) {
       <footer className="bg-gray-800 text-white py-8 mt-12">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p>📱 SecondPhone - มือถือมือสอง รีวิวจริง ขายตรงจากเจ้าของ</p>
-          <p className="text-gray-400 text-sm mt-2">เวอร์ชัน 0.2.0</p>
+          <p className="text-gray-400 text-sm mt-2">เวอร์ชัน {APP_VERSION}</p>
         </div>
       </footer>
     </div>

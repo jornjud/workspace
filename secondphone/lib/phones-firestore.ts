@@ -14,6 +14,7 @@ import { db } from "./firebase";
 
 export interface Phone {
   id: string;
+  code: string; // รหัสสินค้า เช่น SP-001
   model: string;
   storage: string;
   color: string;

@@ -96,6 +96,27 @@
 - 2026-02-23: ปรับ Proactive Mode - เปิ้ลจะไม่เงียบหายอีกแล้ว!
 - 2026-02-23: สร้าง MEMORY.md
 - 2026-03-05: ⚠️ **MiniMax-M2.5-highspeed** ต้องใช้ Coding Plan $40+/เดือน ถึงจะใช้ได้ ใช้กับ MiniMax-M2.5 ปกติแทน
+- 2026-03-09: ✅ ตั้งค่า Brave Search API แล้ว - Search กลับมาทำงานได้!
+
+---
+
+## 📚 Self-Learning Topics
+
+- 🔬 CRISPR-Cas9 - ข่าววิทยาศาสตร์
+- 🇹🇭 Thai Politics - ข่าวการเมือง
+- ⚽ Arsenal FC - ข่าวและตารางแมตช์
+- 💻 OpenClaw Docs - https://docs.openclaw.ai
+- 💻 AI/ML, TypeScript, Dev Tools
+
+---
+
+## 🚀 Projects
+
+### Slip Manager (2026-03-09)
+- **Purpose:** ระบบบันทึกสลิปเงินเข้า + Dashboard
+- **Tech:** Next.js + Firebase Firestore + Vercel
+- **URL:** https://slip-manager-sooty.vercel.app
+- **Status:** Deployed, รอสร้าง Firestore Collection
 
 ---
 

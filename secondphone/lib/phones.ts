@@ -2,6 +2,7 @@ import phonesData from "../data/phones.json";
 
 export interface Phone {
   id: string;
+  code: string;
   model: string;
   storage: string;
   color: string;
