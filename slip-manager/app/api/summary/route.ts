@@ -9,6 +9,12 @@ interface SlipData {
   bank?: string;
 }
 
+interface ExpenseData {
+  id: string;
+  date?: string;
+  amount?: number;
+}
+
 export async function GET() {
   try {
     const now = new Date();
@@ -17,6 +23,10 @@ export async function GET() {
     // Get all slips
     const allSnap = await getDocs(collection(db, 'slips'));
     const allSlips: SlipData[] = allSnap.docs.map(d => ({ id: d.id, ...d.data() } as SlipData));
+
+    // Get all expenses
+    const expensesSnap = await getDocs(collection(db, 'expenses'));
+    const allExpenses: ExpenseData[] = expensesSnap.docs.map(d => ({ id: d.id, ...d.data() } as ExpenseData));
 
     // Parse Thai date "10 มี.ค. 2569" to "2026-03-10"
     const parseThaiDate = (dateStr: string): string => {
@@ -53,16 +63,29 @@ export async function GET() {
       return normalizedDate.includes(`-${monthStr}-`);
     });
 
+    // Filter expenses
+    const todayExpenses = allExpenses.filter(exp => exp.date === today);
+    const monthExpenses = allExpenses.filter(exp => exp.date && exp.date.includes(`-${monthStr}-`));
+
     const byBank: Record<string, number> = {};
     allSlips.forEach(s => { byBank[s.bank || 'Unknown'] = (byBank[s.bank || 'Unknown'] || 0) + (s.amount || 0); });
 
     return NextResponse.json({
+      // Slip data
       totalAmount: allSlips.reduce((s, slip) => s + (slip.amount || 0), 0),
       totalCount: allSlips.length,
       todayAmount: todaySlips.reduce((s, slip) => s + (slip.amount || 0), 0),
       todayCount: todaySlips.length,
       monthAmount: monthSlips.reduce((s, slip) => s + (slip.amount || 0), 0),
       monthCount: monthSlips.length,
+      // Expense data
+      totalExpenses: allExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      todayExpenses: todayExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      monthExpenses: monthExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      // Combined (expenses as costs)
+      totalCosts: allExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      todayCosts: todayExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      monthCosts: monthExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
       byBank,
     });
   } catch (error: any) {

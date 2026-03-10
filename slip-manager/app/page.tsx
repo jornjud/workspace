@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { DollarSign, TrendingUp, Calendar, Building2, CheckCircle, XCircle, Clock, Trash2, Eye, Menu, X, BarChart3, List, Home, Camera, Activity, PieChart as PieChartIcon, RefreshCw, Download } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, Building2, CheckCircle, XCircle, Clock, Trash2, Eye, Menu, X, BarChart3, List, Home, Camera, Activity, PieChart as PieChartIcon, RefreshCw, Download, Wallet, Receipt, FileText } from 'lucide-react';
 import { format, parseISO, subDays } from 'date-fns';
 import { th } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
@@ -40,6 +40,8 @@ const BANK_COLORS: Record<string, string> = {
 export default function Dashboard() {
   const [slips, setSlips] = useState<Slip[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [qrmember, setQrmember] = useState<{totalSales: number, todaySales: number, monthSales: number, monthCount: number, todayCount: number} | null>(null);
+  const [expenses, setExpenses] = useState<{id: string, amount: number, category: string, note: string, date: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSlip, setSelectedSlip] = useState<Slip | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -68,14 +70,20 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [sumRes, slipsRes] = await Promise.all([
+      const [sumRes, slipsRes, qrmemberRes, expensesRes] = await Promise.all([
         fetch('/api/summary'),
-        fetch('/api/slips?limit=100')
+        fetch('/api/slips?limit=100'),
+        fetch('/api/qrmember'),
+        fetch('/api/expenses')
       ]);
       const sumData = await sumRes.json();
       setSummary(sumData);
       const data = await slipsRes.json();
       setSlips(data.slips || []);
+      const qrmemberData = await qrmemberRes.json();
+      setQrmember(qrmemberData);
+      const expensesData = await expensesRes.json();
+      setExpenses(expensesData.expenses || []);
       setLastUpdate(new Date());
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -175,6 +183,8 @@ export default function Dashboard() {
   const menuItems = [
     { id: 'dashboard', label: 'ภาพรวม', icon: Home },
     { id: 'slips', label: 'รายการสลิป', icon: List },
+    { id: 'expenses', label: 'ค่าใช้จ่าย', icon: Receipt },
+    { id: 'report', label: 'รายงาน', icon: FileText },
     { id: 'stats', label: 'สถิติ', icon: BarChart3 },
     { id: 'upload', label: 'อัพโหลดสลิป', icon: Camera },
   ];
@@ -235,24 +245,34 @@ export default function Dashboard() {
           {/* Dashboard View */}
           {activeMenu === 'dashboard' && (
             <div className="space-y-6">
-              {/* Stats Cards - Grafana Style */}
+              {/* Business Overview - Combined */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
+                <div className="bg-gradient-to-br from-green-900/50 to-slate-800/50 rounded-xl p-5 border border-green-700/50 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-400 text-sm font-medium">ยอดรวมทั้งหมด</p>
-                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{summary?.totalAmount != null ? formatCurrency(summary.totalAmount) : '-'}</p>
-                      <p className="text-slate-500 text-xs mt-1">{summary?.totalCount || 0} รายการ</p>
+                      <p className="text-green-400 text-sm font-medium">💰 รายได้ (QRMember)</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
+                      <p className="text-slate-500 text-xs mt-1">เดือนนี้</p>
                     </div>
                     <DollarSign className="text-green-400" size={32}/>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
+                <div className="bg-gradient-to-br from-red-900/50 to-slate-800/50 rounded-xl p-5 border border-red-700/50 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-400 text-sm font-medium">วันนี้</p>
-                      <p className="text-2xl md:text-3xl font-bold text-blue-400 mt-1">{summary?.todayAmount != null ? formatCurrency(summary.todayAmount) : '-'}</p>
-                      <p className="text-slate-500 text-xs mt-1">{summary?.todayCount || 0} รายการ</p>
+                      <p className="text-red-400 text-sm font-medium">📤 ค่าใช้จ่าย (สลิป)</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{summary?.monthAmount != null ? formatCurrency(summary.monthAmount) : '-'}</p>
+                      <p className="text-slate-500 text-xs mt-1">เดือนนี้</p>
+                    </div>
+                    <TrendingUp className="text-red-400" size={32}/>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-900/50 to-slate-800/50 rounded-xl p-5 border border-blue-700/50 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-400 text-sm font-medium">📊 กำไร/ขาดทุน</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{(qrmember?.monthSales || 0) - (summary?.monthAmount || 0) >= 0 ? '' : '-'}{formatCurrency(Math.abs((qrmember?.monthSales || 0) - (summary?.monthAmount || 0)))}</p>
+                      <p className="text-slate-500 text-xs mt-1">เดือนนี้</p>
                     </div>
                     <Calendar className="text-blue-400" size={32}/>
                   </div>
@@ -260,21 +280,54 @@ export default function Dashboard() {
                 <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-400 text-sm font-medium">เดือนนี้</p>
-                      <p className="text-2xl md:text-3xl font-bold text-purple-400 mt-1">{summary?.monthAmount != null ? formatCurrency(summary.monthAmount) : '-'}</p>
-                      <p className="text-slate-500 text-xs mt-1">{summary?.monthCount || 0} รายการ</p>
+                      <p className="text-slate-400 text-sm font-medium">🏦 ธนาคาร</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{Object.keys(summary?.byBank || {}).length}</p>
+                      <p className="text-slate-500 text-xs mt-1">แหล่งที่มา</p>
                     </div>
-                    <TrendingUp className="text-purple-400" size={32}/>
+                    <Building2 className="text-orange-400" size={32}/>
+                  </div>
+                </div>
+              </div>
+
+              {/* Today's Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-400 text-sm font-medium">ยอดขายวันนี้</p>
+                      <p className="text-xl md:text-2xl font-bold text-green-400 mt-1">{qrmember?.todaySales != null ? formatCurrency(qrmember.todaySales) : '-'}</p>
+                      <p className="text-slate-500 text-xs">{qrmember?.todaySales || 0} บาท</p>
+                    </div>
+                    <DollarSign className="text-green-400" size={24}/>
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-400 text-sm font-medium">ธนาคาร</p>
-                      <p className="text-2xl md:text-3xl font-bold text-orange-400 mt-1">{Object.keys(summary?.byBank || {}).length}</p>
-                      <p className="text-slate-500 text-xs mt-1">แหล่งที่มา</p>
+                      <p className="text-slate-400 text-sm font-medium">ค่าใช้จ่ายวันนี้</p>
+                      <p className="text-xl md:text-2xl font-bold text-red-400 mt-1">{summary?.todayAmount != null ? formatCurrency(summary.todayAmount) : '-'}</p>
+                      <p className="text-slate-500 text-xs">{summary?.todayCount || 0} รายการ</p>
                     </div>
-                    <Building2 className="text-orange-400" size={32}/>
+                    <TrendingUp className="text-red-400" size={24}/>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-400 text-sm font-medium">กำไรวันนี้</p>
+                      <p className="text-xl md:text-2xl font-bold text-blue-400 mt-1">{formatCurrency((qrmember?.todaySales || 0) - (summary?.todayAmount || 0))}</p>
+                    </div>
+                    <Calendar className="text-blue-400" size={24}/>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-5 border border-slate-700 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-400 text-sm font-medium">ยอดขายเดือนนี้</p>
+                      <p className="text-xl md:text-2xl font-bold text-purple-400 mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
+                      <p className="text-slate-500 text-xs">{qrmember?.monthCount || 0} รายการ</p>
+                    </div>
+                    <Building2 className="text-purple-400" size={24}/>
                   </div>
                 </div>
               </div>
@@ -467,6 +520,168 @@ export default function Dashboard() {
                       <Legend/>
                     </PieChart>
                   </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Expenses View */}
+          {activeMenu === 'expenses' && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-white">ค่าใช้จ่าย</h2>
+              
+              {/* Add Expense Form */}
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5">
+                <h3 className="text-white font-semibold mb-4">➕ เพิ่มค่าใช้จ่าย</h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const amount = (form.elements.namedItem('amount') as HTMLInputElement).value;
+                  const category = (form.elements.namedItem('category') as HTMLSelectElement).value;
+                  const note = (form.elements.namedItem('note') as HTMLInputElement).value;
+                  const date = (form.elements.namedItem('date') as HTMLInputElement).value;
+                  
+                  const res = await fetch('/api/expenses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, category, note, date })
+                  });
+                  if (res.ok) {
+                    alert('✅ บันทึกสำเร็จ!');
+                    form.reset();
+                    fetchData();
+                  }
+                }} className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="number" name="amount" placeholder="จำนวนเงิน" required className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full"/>
+                    <input type="date" name="date" defaultValue={new Date().toISOString().split('T')[0]} required className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full"/>
+                  </div>
+                  <select name="category" className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full">
+                    <option value="ค่าของ">ค่าของ</option>
+                    <option value="ค่าน้ำ">ค่าน้ำ</option>
+                    <option value="ค่าไฟ">ค่าไฟ</option>
+                    <option value="ค่าเช่า">ค่าเช่า</option>
+                    <option value="ค่าขนส่ง">ค่าขนส่ง</option>
+                    <option value="เงินเดือน">เงินเดือน</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                  </select>
+                  <input type="text" name="note" placeholder="หมายเหตุ (เช่น ค่าข้าวมันไท)" className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full"/>
+                  <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold">
+                    💾 บันทึก
+                  </button>
+                </form>
+              </div>
+
+              {/* Expenses List */}
+              <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-slate-700/50 text-slate-300">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-semibold">วันที่</th>
+                      <th className="text-left py-3 px-4 font-semibold">หมวด</th>
+                      <th className="text-left py-3 px-4 font-semibold">หมายเหตุ</th>
+                      <th className="text-right py-3 px-4 font-semibold">จำนวน</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/50">
+                    {expenses.length === 0 ? (
+                      <tr><td colSpan={4} className="py-8 text-center text-slate-500">ยังไม่มีรายการค่าใช้จ่าย</td></tr>
+                    ) : expenses.map(exp => (
+                      <tr key={exp.id} className="hover:bg-slate-700/30">
+                        <td className="py-3 px-4 text-white">{exp.date}</td>
+                        <td className="py-3 px-4 text-slate-300">{exp.category}</td>
+                        <td className="py-3 px-4 text-slate-400">{exp.note}</td>
+                        <td className="py-3 px-4 text-red-400 font-semibold text-right">{formatCurrency(exp.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Report View */}
+          {activeMenu === 'report' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">📊 รายงานประจำเดือน</h2>
+                <button onClick={() => {
+                  const reportData = [
+                    ['รายงานประจำเดือน'],
+                    [''],
+                    ['หัวข้อ', 'จำนวน', 'หมายเหตุ'],
+                    ['รายได้ (QRMember)', qrmember?.monthSales || 0, 'ยอดขายเดือนนี้'],
+                    ['ค่าใช้จ่าย (สลิป)', summary?.monthAmount || 0, 'ค่าใช้จ่ายจากสลิป'],
+                    ['ค่าใช้จ่าย (อื่น)', expenses.reduce((sum, e) => sum + (e.amount || 0), 0), 'ค่าใช้จ่ายที่บันทึก'],
+                    ['กำไร/ขาดทุน', (qrmember?.monthSales || 0) - (summary?.monthAmount || 0) - expenses.reduce((sum, e) => sum + (e.amount || 0), 0), ''],
+                    [''],
+                    ['รายละเอียดรายได้'],
+                    ['วันที่', 'ผู้รับ', 'จำนวน', 'ธนาคาร'],
+                    ...slips.map(s => [s.date, s.receiverName, s.amount, s.bank]),
+                  ];
+                  const csv = reportData.map(r => r.join(',')).join('\n');
+                  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = `report_${new Date().toISOString().split('T')[0]}.csv`;
+                  link.click();
+                }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2">
+                  <Download size={18}/> Export CSV
+                </button>
+              </div>
+
+              {/* Monthly Summary */}
+              <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-xl p-6 border border-slate-700">
+                <h3 className="text-white font-semibold mb-4">📅 สรุปเดือนนี้</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-700/30">
+                    <p className="text-green-400 text-sm">💰 รายได้ (QRMember)</p>
+                    <p className="text-2xl font-bold text-white mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
+                    <p className="text-slate-400 text-xs">{qrmember?.monthCount || 0} รายการ</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-700/30">
+                    <p className="text-red-400 text-sm">📤 ค่าใช้จ่าย (สลิป)</p>
+                    <p className="text-2xl font-bold text-white mt-1">{summary?.monthAmount != null ? formatCurrency(summary.monthAmount) : '-'}</p>
+                    <p className="text-slate-400 text-xs">{summary?.monthCount || 0} รายการ</p>
+                  </div>
+                  <div className="bg-yellow-900/30 rounded-lg p-4 border border-yellow-700/30">
+                    <p className="text-yellow-400 text-sm">📝 ค่าใช้จ่าย (อื่น)</p>
+                    <p className="text-2xl font-bold text-white mt-1">{formatCurrency(expenses.reduce((sum, e) => sum + (e.amount || 0), 0))}</p>
+                    <p className="text-slate-400 text-xs">{expenses.length} รายการ</p>
+                  </div>
+                </div>
+                <div className="mt-4 bg-blue-900/30 rounded-lg p-4 border border-blue-700/30">
+                  <p className="text-blue-400 text-sm font-semibold">📊 กำไร/ขาดทุน สุทธิ</p>
+                  <p className={`text-3xl font-bold mt-1 ${((qrmember?.monthSales || 0) - (summary?.monthAmount || 0) - expenses.reduce((sum, e) => sum + (e.amount || 0), 0)) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {formatCurrency((qrmember?.monthSales || 0) - (summary?.monthAmount || 0) - expenses.reduce((sum, e) => sum + (e.amount || 0), 0))}
+                  </p>
+                </div>
+              </div>
+
+              {/* Daily Breakdown */}
+              <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                <h3 className="text-white font-semibold mb-4">📅 รายวัน (7 วันล่าสุด)</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-700/50 text-slate-300">
+                      <tr>
+                        <th className="text-left py-2 px-3">วันที่</th>
+                        <th className="text-right py-2 px-3">รายได้</th>
+                        <th className="text-right py-2 px-3">ค่าใช้จ่าย</th>
+                        <th className="text-right py-2 px-3">กำไร/ขาดทุน</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-white">
+                      {dailyTrend.map(day => (
+                        <tr key={day.date} className="border-b border-slate-700/50">
+                          <td className="py-2 px-3">{day.date}</td>
+                          <td className="py-2 px-3 text-right text-green-400">{formatCurrency(day.amount)}</td>
+                          <td className="py-2 px-3 text-right text-red-400">-</td>
+                          <td className="py-2 px-3 text-right text-green-400">{formatCurrency(day.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
