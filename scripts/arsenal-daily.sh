@@ -1,9 +1,11 @@
 #!/bin/bash
-# Arsenal Comprehensive Daily Briefing Script
-# Sends detailed Arsenal news to user via Telegram
+# Arsenal Daily Briefing - Optimized with RSS + State Tracking
+# Only sends when there's genuinely new news
 
 BOT_TOKEN="8455704218:AAHjpE_D4apMr_SgdSK--5uQ6kTJl6Tzirg"
 CHAT_ID="692554068"
+STATE_FILE="/tmp/arsenal-state.json"
+RSS_URL="https://feeds.bbci.co.uk/sport/football/teams/arsenal/rss.xml"
 
 # Function to send message
 send_message() {
@@ -13,86 +15,98 @@ send_message() {
         -d "parse_mode=Markdown"
 }
 
-# ============ PART 1: Premier League Table ============
-TABLE_MSG="🔴⚪ *ARSENAL DAILY BRIEFING* 🔴⚪
-📅 $(date '+%d %b %Y')
+# Fetch latest news from RSS
+RSS_DATA=$(curl -s "$RSS_URL" 2>/dev/null)
+
+# Extract latest 3 news titles (skip first which is channel title)
+NEWS_TITLES=$(echo "$RSS_DATA" | grep -oP '(?<=<title><!\[CDATA\[)[^]]+(?=\]\]></title>)' | tail -n +2 | head -3)
+
+NEWS_1=$(echo "$NEWS_TITLES" | sed -n '1p')
+NEWS_2=$(echo "$NEWS_TITLES" | sed -n '2p')
+NEWS_3=$(echo "$NEWS_TITLES" | sed -n '3p')
+
+# Get today's date string
+TODAY_STR=$(date '+%Y-%m-%d')
+
+# ============ LOAD PREVIOUS STATE ============
+if [ -f "$STATE_FILE" ]; then
+    LAST_DATE=$(jq -r '.lastDate' "$STATE_FILE" 2>/dev/null)
+    LAST_NEWS_1=$(jq -r '.lastNews1' "$STATE_FILE" 2>/dev/null)
+else
+    LAST_DATE=""
+    LAST_NEWS_1=""
+fi
+
+# ============ DETERMINE WHAT TO SEND ============
+
+# If first run ever
+if [ -z "$LAST_DATE" ]; then
+    MSG="🔴⚪ *ARSENAL DAILY* $(date '+%d %b')
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-📊 *Premier League Table*
-| # | Team | P | W | D | L | GD | Pts |
-|---|------|---|---|---|---|-----|-----|
-| *1* | *Arsenal* 🔴⚪ | 30 | 20 | 7 | 3 | +37 | *67* |
-| 2 | Man City | 29 | 18 | 6 | 5 | +32 | 60 |
-| 3 | Man United | 29 | 14 | 9 | 6 | +11 | 51 |
-| 4 | Aston Villa | 29 | 15 | 6 | 8 | +5 | 51 |
+📰 *ข่าวล่าสุด*
+• $NEWS_1
+• $NEWS_2
 
-📈 *Arsenal นำจ่าฝูง +7 แต้ม!*"
+📊 *PL Table:* Arsenal 67pts (1st)
 
-send_message "$TABLE_MSG"
-
-# ============ PART 2: Fixtures ============
-FIXTURES_MSG="━━━━━━━━━━━━━━━━━━━━━━
-
-📅 *Upcoming Fixtures*
-• 7 มี.ค. 19:15 - @ Mansfield Town (FA Cup)
-• 11 มี.ค. 00:45 - @ Bayer Leverkusen (CL)
-• 14 มี.ค. 20:30 - vs Everton (PL)
-• 17 มี.ค. 03:00 - vs Bayer Leverkusen (CL)
-• 22 มี.ค. 19:30 - vs Man City (Carabao Cup - Wembley)
-
-📆 *Remaining PL:* 8 นัด"
-
-send_message "$FIXTURES_MSG"
-
-# ============ PART 3: Injury News ============
-INJURY_MSG="━━━━━━━━━━━━━━━━━━━━━━
-
-🏥 *Injury Update*
-• Kai Havertz: กลับมาแล้ว ✅
-• Declan Rice: พร้อมลงเล่น ✅
-• Martin Odegaard: กลับมาซ้อมแล้ว
-• Ben White: ยังไม่พร้อม"
-
-send_message "$INJURY_MSG"
-
-# ============ PART 4: Stats ============
-STATS_MSG="━━━━━━━━━━━━━━━━━━━━━━
-
-📈 *Key Stats 2025/26*
-• Goals For: 59 (ที่ 2)
-• Goals Against: 22 (ที่ 1 - ดีที่สุด!)
-• Goal Diff: +37 (ดีที่สุด!)
-• Clean Sheets: 14+
-• Win Rate: 67%
-
-🏅 *Top Scorers*
-• Saka: 15+
-• Havertz: 10+
-• Martinelli: 8+"
-
-send_message "$STATS_MSG"
-
-# ============ PART 5: Match Analysis ============
-ANALYSIS_MSG="━━━━━━━━━━━━━━━━━━━━━━
-
-📝 *Last Match: Brighton 0-1 Arsenal*
-✅ Saka ซัดประตูที่ 300!
-✅ Clean sheet ที่ Amex Stadium
-✅ กลับมานำจ่าฝูง +7 แต้ม
-
-⚠️ *จุดปรับ:* ครองบอลช่วงที่ 2
+📅 *แมตช์ถัดไป:* Today vs Brighton
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-🔮 *Next Game: Mansfield Town (FA Cup)*
-📊 League One - อันดับ 3
-💪 *ต้องรุกตั้งแต่แรก!*
+🔴 *COYS!* 🔴⚪"
+    
+    send_message "$MSG"
+    echo "{\"lastDate\":\"$TODAY_STR\",\"lastNews1\":\"$NEWS_1\"}" > "$STATE_FILE"
+    echo "First run - sent initial briefing"
+    exit 0
+fi
+
+# If already sent today - check if headline news actually changed
+if [ "$LAST_DATE" = "$TODAY_STR" ]; then
+    if [ "$NEWS_1" != "$LAST_NEWS_1" ]; then
+        # News headline changed - send quick update
+        MSG="🔴⚪ *ARSENAL UPDATE* $(date '+%d %b')
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
-🔴 *COYS! Up the Gunners!* 🔴⚪💪"
+📰 *ข่าวใหม่*
+• $NEWS_1
 
-send_message "$ANALYSIS_MSG"
+━━━━━━━━━━━━━━━━━━━━━━
 
-echo "Arsenal briefing sent at $(date)"
+🔴 *COYS!* 🔴⚪"
+        send_message "$MSG"
+        echo "{\"lastDate\":\"$TODAY_STR\",\"lastNews1\":\"$NEWS_1\"}" > "$STATE_FILE"
+        echo "New headline - sent update"
+    else
+        echo "No new Arsenal news today ($(date)) - same headline"
+    fi
+    exit 0
+fi
+
+# New day - send daily briefing
+MSG="🔴⚪ *ARSENAL DAILY* $(date '+%d %b')
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+📰 *ข่าววันนี้*
+• $NEWS_1
+• $NEWS_2
+• $NEWS_3
+
+📊 *PL Table:* Arsenal 67pts (1st) | +7 จ่าฝูง
+
+📅 *แมตช์ถัดไป:* Today vs Brighton
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 *COYS!* 🔴⚪"
+
+send_message "$MSG"
+
+# Update state
+echo "{\"lastDate\":\"$TODAY_STR\",\"lastNews1\":\"$NEWS_1\"}" > "$STATE_FILE"
+
+echo "Arsenal daily sent: $TODAY_STR"
