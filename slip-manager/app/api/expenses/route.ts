@@ -1,11 +1,29 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { amount, category, note, date } = body;
+
+    // 🔍 ตรวจสอบการเพิ่มซ้ำ (ชื่อ + จำนวนเงิน + วันที่)
+    if (note && amount && date) {
+      const dupQuery = query(
+        collection(db, 'expenses'),
+        where('note', '==', note),
+        where('amount', '==', Number(amount)),
+        where('date', '==', date)
+      );
+      const dupSnapshot = await getDocs(dupQuery);
+      if (!dupSnapshot.empty) {
+        return NextResponse.json({ 
+          error: '⚠️ รายการนี้มีอยู่แล้ว!', 
+          duplicate: true,
+          existingId: dupSnapshot.docs[0].id 
+        }, { status: 409 });
+      }
+    }
 
     const expense = {
       amount: Number(amount),

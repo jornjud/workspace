@@ -63,9 +63,20 @@ export async function GET() {
       return normalizedDate.includes(`-${monthStr}-`);
     });
 
-    // Filter expenses
-    const todayExpenses = allExpenses.filter(exp => exp.date === today);
-    const monthExpenses = allExpenses.filter(exp => exp.date && exp.date.includes(`-${monthStr}-`));
+    // Filter expenses - also check Thai date format
+    const todayExpenses = allExpenses.filter(exp => {
+      const normalizedDate = parseThaiDate(exp.date || '');
+      return normalizedDate === today;
+    });
+    const monthExpenses = allExpenses.filter(exp => {
+      const normalizedDate = parseThaiDate(exp.date || '');
+      return normalizedDate.includes(`-${monthStr}-`);
+    });
+
+    // Combined costs = slips + expenses
+    const todayCosts = todaySlips.reduce((s, slip) => s + (slip.amount || 0), 0) + todayExpenses.reduce((s, exp) => s + (exp.amount || 0), 0);
+    const monthCosts = monthSlips.reduce((s, slip) => s + (slip.amount || 0), 0) + monthExpenses.reduce((s, exp) => s + (exp.amount || 0), 0);
+    const totalCosts = allSlips.reduce((s, slip) => s + (slip.amount || 0), 0) + allExpenses.reduce((s, exp) => s + (exp.amount || 0), 0);
 
     const byBank: Record<string, number> = {};
     allSlips.forEach(s => { byBank[s.bank || 'Unknown'] = (byBank[s.bank || 'Unknown'] || 0) + (s.amount || 0); });
@@ -74,18 +85,18 @@ export async function GET() {
       // Slip data
       totalAmount: allSlips.reduce((s, slip) => s + (slip.amount || 0), 0),
       totalCount: allSlips.length,
-      todayAmount: todaySlips.reduce((s, slip) => s + (slip.amount || 0), 0),
-      todayCount: todaySlips.length,
-      monthAmount: monthSlips.reduce((s, slip) => s + (slip.amount || 0), 0),
-      monthCount: monthSlips.length,
+      todaySlipAmount: todaySlips.reduce((s, slip) => s + (slip.amount || 0), 0),
+      todaySlipCount: todaySlips.length,
+      monthSlipAmount: monthSlips.reduce((s, slip) => s + (slip.amount || 0), 0),
+      monthSlipCount: monthSlips.length,
       // Expense data
       totalExpenses: allExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
       todayExpenses: todayExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
       monthExpenses: monthExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
-      // Combined (expenses as costs)
-      totalCosts: allExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
-      todayCosts: todayExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
-      monthCosts: monthExpenses.reduce((s, exp) => s + (exp.amount || 0), 0),
+      // Combined costs = slips + expenses
+      totalCosts: totalCosts,
+      todayCosts: todayCosts,
+      monthCosts: monthCosts,
       byBank,
     });
   } catch (error: any) {
