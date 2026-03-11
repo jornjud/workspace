@@ -235,13 +235,12 @@ export default function Dashboard() {
   // Recent transactions - combined from slips and expenses (latest 10)
   // กรองเอาเฉพาะ slip จริงๆ (ไม่เอา expense ที่ผิดพลาด)
   // - status=expense คือ expense ไม่ใช่ slip
-  // - bank=เงินสด + senderName="-" และ description มี "ค่า" หรือ "ยา" = น่าจะเป็น expense
+  // - bank=เงินสด + senderName="-" = expense ไม่ใช่ slip
   const filteredSlips = slips.filter((s: any) => {
     if (s.status === 'expense') return false;
     // กรอง slip ที่เป็น expense โดยไม่ตั้งใจ (bank=เงินสด, ไม่มี sender จริง)
     if (s.bank === 'เงินสด' && (!s.senderName || s.senderName === '-' || s.senderName === '')) {
-      const desc = (s.description || s.note || '').toLowerCase();
-      if (desc.includes('ค่า') || desc.includes('ยา')) return false;
+      return false;
     }
     return true;
   });
