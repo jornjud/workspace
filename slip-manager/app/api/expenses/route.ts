@@ -43,9 +43,11 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
-    const q = query(collection(db, 'expenses'), orderBy('createdAt', 'desc'), limit(100));
+    const q = query(collection(db, 'expenses'), limit(200));
     const snapshot = await getDocs(q);
-    const expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    let expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Sort by createdAt descending (newest first)
+    expenses.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
     return NextResponse.json({ expenses });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
