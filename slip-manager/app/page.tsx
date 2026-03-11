@@ -651,26 +651,51 @@ export default function Dashboard() {
               
               {/* Add Expense Form */}
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5">
-                <h3 className="text-white font-semibold mb-4">➕ เพิ่มค่าใช้จ่าย</h3>
+                <h3 className="text-white font-semibold mb-4">➕ เพิ่มรายการ</h3>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const form = e.target as HTMLFormElement;
+                  const type = (form.elements.namedItem('type') as HTMLSelectElement).value;
                   const amount = (form.elements.namedItem('amount') as HTMLInputElement).value;
                   const category = (form.elements.namedItem('category') as HTMLSelectElement).value;
                   const note = (form.elements.namedItem('note') as HTMLInputElement).value;
                   const date = (form.elements.namedItem('date') as HTMLInputElement).value;
                   
-                  const res = await fetch('/api/expenses', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount, category, note, date })
-                  });
+                  if (type === 'income') {
+                    // Save as slip (income)
+                    var res = await fetch('/api/slips', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ 
+                        amount, 
+                        date, 
+                        time: new Date().toTimeString().slice(0,5),
+                        bank: 'เงินสด',
+                        senderName: note || 'รายรับ',
+                        receiverName: '-',
+                        reference: '-',
+                        status: 'approved',
+                        slipType: 'income'
+                      })
+                    });
+                  } else {
+                    // Save as expense
+                    var res = await fetch('/api/expenses', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ amount, category, note, date })
+                    });
+                  }
                   if (res.ok) {
                     alert('✅ บันทึกสำเร็จ!');
                     form.reset();
                     fetchData();
                   }
                 }} className="space-y-3">
+                  <select name="type" className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full">
+                    <option value="expense">📤 รายจ่าย</option>
+                    <option value="income">📥 รายรับ</option>
+                  </select>
                   <div className="grid grid-cols-2 gap-3">
                     <input type="number" name="amount" placeholder="จำนวนเงิน" required className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full"/>
                     <input type="date" name="date" defaultValue={new Date().toISOString().split('T')[0]} required className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white w-full"/>
@@ -693,7 +718,8 @@ export default function Dashboard() {
 
               {/* Combined expenses data */}
               {(() => {
-                const slipExpenses = slips.filter(s => s.slipType === 'expense');
+                // Include slips without slipType (backward compatible) or with slipType='expense'
+                const slipExpenses = slips.filter(s => !s.slipType || s.slipType === 'expense');
                 const combinedExpenses: CombinedTransaction[] = [
                   ...slipExpenses.map(s => ({
                     id: s.id,
