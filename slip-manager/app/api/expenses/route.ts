@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
-    const q = query(collection(db, 'expenses'), orderBy('date', 'desc'), limit(100));
+    const q = query(collection(db, 'expenses'), orderBy('createdAt', 'desc'), limit(100));
     const snapshot = await getDocs(q);
     const expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     return NextResponse.json({ expenses });
