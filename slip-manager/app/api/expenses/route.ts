@@ -40,6 +40,9 @@ export async function POST(request: Request) {
   }
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
@@ -48,12 +51,7 @@ export async function GET() {
     let expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Sort by createdAt descending (newest first)
     expenses.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    return NextResponse.json({ expenses }, { 
-      headers: { 
-        'Cache-Control': 'no-store, max-age=0, must-revalidate',
-        'Pragma': 'no-cache'
-      } 
-    });
+    return NextResponse.json({ expenses });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
