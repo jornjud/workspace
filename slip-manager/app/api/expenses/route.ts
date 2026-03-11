@@ -48,7 +48,12 @@ export async function GET() {
     let expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     // Sort by createdAt descending (newest first)
     expenses.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    return NextResponse.json({ expenses });
+    return NextResponse.json({ expenses }, { 
+      headers: { 
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache'
+      } 
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
