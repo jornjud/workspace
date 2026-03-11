@@ -48,6 +48,9 @@ export default function Dashboard() {
   const [qrmember, setQrmember] = useState<{totalSales: number, todaySales: number, monthSales: number, monthCount: number, todayCount: number} | null>(null);
   const [expenses, setExpenses] = useState<{id: string, amount: number, category: string, note: string, date: string}[]>([]);
   const [editingExpense, setEditingExpense] = useState<{id: string, amount: number, category: string, note: string, date: string} | null>(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [filteredExpenses, setFilteredExpenses] = useState<{id: string, amount: number, category: string, note: string, date: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSlip, setSelectedSlip] = useState<Slip | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -73,6 +76,23 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Filter expenses by date range
+  const filterExpenses = (expenseList: typeof expenses, from: string, to: string) => {
+    let filtered = [...expenseList];
+    if (from) {
+      filtered = filtered.filter(e => e.date >= from);
+    }
+    if (to) {
+      filtered = filtered.filter(e => e.date <= to);
+    }
+    setFilteredExpenses(filtered);
+  };
+
+  // Watch for date range changes
+  useEffect(() => {
+    filterExpenses(expenses, dateFrom, dateTo);
+  }, [dateFrom, dateTo, expenses]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -89,7 +109,10 @@ export default function Dashboard() {
       const qrmemberData = await qrmemberRes.json();
       setQrmember(qrmemberData);
       const expensesData = await expensesRes.json();
-      setExpenses(expensesData.expenses || []);
+      const allExpenses = expensesData.expenses || [];
+      setExpenses(allExpenses);
+      // Apply initial filter if date range is set
+      filterExpenses(allExpenses, dateFrom, dateTo);
       setLastUpdate(new Date());
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -183,8 +206,8 @@ export default function Dashboard() {
     return { date: displayDate, amount, count };
   });
 
-  // Recent transactions (latest 5)
-  const recentSlips = [...slips].slice(0, 5);
+  // Recent transactions (latest 10)
+  const recentSlips = [...slips].slice(0, 10);
 
   const menuItems = [
     { id: 'dashboard', label: 'ภาพรวม', icon: Home },
@@ -529,7 +552,42 @@ export default function Dashboard() {
           {/* Expenses View */}
           {activeMenu === 'expenses' && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-white">ค่าใช้จ่าย</h2>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h2 className="text-xl font-bold text-white">ค่าใช้จ่าย</h2>
+                {/* Date Range Picker */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+                    placeholder="จากวันที่"
+                  />
+                  <span className="text-slate-400">-</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+                    placeholder="ถึงวันที่"
+                  />
+                  <button
+                    onClick={() => { setDateFrom(''); setDateTo(''); }}
+                    className="px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm"
+                  >
+                    ล้าง
+                  </button>
+                </div>
+              </div>
+
+              {/* Filtered Expenses Summary */}
+              {(dateFrom || dateTo) && (
+                <div className="bg-blue-900/30 rounded-lg p-4 border border-blue-700/30">
+                  <p className="text-blue-400 text-sm">
+                    แสดงรายการค่าใช้จ่าย: {dateFrom ? `จาก ${dateFrom}` : 'ทั้งหมด'} {dateTo ? `ถึง ${dateTo}` : ''}
+                  </p>
+                </div>
+              )}
               
               {/* Add Expense Form */}
               <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5">
