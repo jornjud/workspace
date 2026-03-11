@@ -466,9 +466,8 @@ export default function Dashboard() {
                   <table className="w-full">
                     <thead className="text-slate-400 text-sm border-b border-slate-700">
                       <tr>
-                        <th className="text-left py-3 px-2">วันที่</th>
                         <th className="text-left py-3 px-2">ประเภท</th>
-                        <th className="text-left py-3 px-2">วันที่</th>
+                        <th className="text-left py-3 px-2">วันที่/เวลา</th>
                         <th className="text-left py-3 px-2">จำนวน</th>
                         <th className="text-left py-3 px-2">รายละเอียด</th>
                         <th className="text-left py-3 px-2">สถานะ</th>
