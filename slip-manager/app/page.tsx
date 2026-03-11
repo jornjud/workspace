@@ -5,6 +5,7 @@ import { DollarSign, TrendingUp, Calendar, Building2, CheckCircle, XCircle, Cloc
 import { format, parseISO, subDays } from 'date-fns';
 import { th } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
+import { VERSION } from './version';
 
 interface Slip {
   id: string;
@@ -328,6 +329,9 @@ export default function Dashboard() {
               </button>
             ))}
           </nav>
+          <div className="p-4 border-t border-slate-700 text-center">
+            <p className="text-slate-500 text-xs">v{VERSION}</p>
+          </div>
         </aside>
 
         {/* Mobile Overlay */}
