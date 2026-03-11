@@ -16,6 +16,21 @@ interface Slip {
   receiverName: string;
   reference: string;
   status: 'pending' | 'approved' | 'rejected';
+  slipType?: 'income' | 'expense';
+}
+
+// Combined transaction for dashboard
+interface CombinedTransaction {
+  id: string;
+  amount: number;
+  date: string;
+  time: string;
+  type: 'slip' | 'expense';
+  category?: string;
+  note?: string;
+  bank?: string;
+  senderName?: string;
+  status?: string;
 }
 
 interface Summary {
@@ -206,8 +221,32 @@ export default function Dashboard() {
     return { date: displayDate, amount, count };
   });
 
-  // Recent transactions (latest 10)
-  const recentSlips = [...slips].slice(0, 10);
+  // Recent transactions - combined from slips and expenses (latest 10)
+  const recentTransactions: CombinedTransaction[] = [
+    ...slips.map(s => ({
+      id: s.id,
+      amount: s.amount,
+      date: s.date,
+      time: s.time || '',
+      type: 'slip' as const,
+      bank: s.bank,
+      senderName: s.senderName,
+      status: s.status
+    })),
+    ...expenses.map(e => ({
+      id: e.id,
+      amount: e.amount,
+      date: e.date,
+      time: '',
+      type: 'expense' as const,
+      category: e.category,
+      note: e.note
+    }))
+  ].sort((a, b) => {
+    const dateA = a.date + (a.time || '');
+    const dateB = b.date + (b.time || '');
+    return dateB.localeCompare(dateA);
+  }).slice(0, 10);
 
   const menuItems = [
     { id: 'dashboard', label: 'ภาพรวม', icon: Home },
@@ -428,20 +467,41 @@ export default function Dashboard() {
                     <thead className="text-slate-400 text-sm border-b border-slate-700">
                       <tr>
                         <th className="text-left py-3 px-2">วันที่</th>
+                        <th className="text-left py-3 px-2">ประเภท</th>
+                        <th className="text-left py-3 px-2">วันที่</th>
                         <th className="text-left py-3 px-2">จำนวน</th>
-                        <th className="text-left py-3 px-2">ธนาคาร</th>
-                        <th className="text-left py-3 px-2">ผู้โอน</th>
+                        <th className="text-left py-3 px-2">รายละเอียด</th>
                         <th className="text-left py-3 px-2">สถานะ</th>
                       </tr>
                     </thead>
                     <tbody className="text-white">
-                      {recentSlips.map(slip => (
-                        <tr key={slip.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                          <td className="py-3 px-2 text-sm">{formatDate(slip.date)} {slip.time}</td>
-                          <td className="py-3 px-2 text-green-400 font-semibold">{formatCurrency(slip.amount)}</td>
-                          <td className="py-3 px-2 text-sm">{slip.bank}</td>
-                          <td className="py-3 px-2 text-sm">{slip.senderName}</td>
-                          <td className="py-3 px-2">{getStatusBadge(slip.status)}</td>
+                      {recentTransactions.map(item => (
+                        <tr key={item.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                          <td className="py-3 px-2">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${item.type === 'slip' ? 'bg-blue-600/30 text-blue-400' : 'bg-purple-600/30 text-purple-400'}`}>
+                              {item.type === 'slip' ? 'สลิป' : 'เงินสด'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-sm">{formatDate(item.date)} {item.time}</td>
+                          <td className={`py-3 px-2 font-semibold ${item.type === 'slip' ? 'text-green-400' : 'text-red-400'}`}>
+                            {item.type === 'slip' ? '' : '-'}{formatCurrency(item.amount)}
+                          </td>
+                          <td className="py-3 px-2 text-sm">
+                            {item.type === 'slip' ? (
+                              <>
+                                <span className="block">{item.bank}</span>
+                                <span className="text-slate-400 text-xs">{item.senderName}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="block">{item.category}</span>
+                                <span className="text-slate-400 text-xs">{item.note}</span>
+                              </>
+                            )}
+                          </td>
+                          <td className="py-3 px-2">
+                            {item.type === 'slip' ? getStatusBadge(item.status || 'pending') : '-'}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -631,37 +691,88 @@ export default function Dashboard() {
                 </form>
               </div>
 
+              {/* Combined expenses data */}
+              {(() => {
+                const slipExpenses = slips.filter(s => s.slipType === 'expense');
+                const combinedExpenses: CombinedTransaction[] = [
+                  ...slipExpenses.map(s => ({
+                    id: s.id,
+                    amount: s.amount,
+                    date: s.date,
+                    time: s.time || '',
+                    type: 'slip' as const,
+                    bank: s.bank,
+                    senderName: s.senderName,
+                    status: s.status,
+                    slipType: s.slipType
+                  })),
+                  ...expenses.map(e => ({
+                    id: e.id,
+                    amount: e.amount,
+                    date: e.date,
+                    time: '',
+                    type: 'expense' as const,
+                    category: e.category,
+                    note: e.note
+                  }))
+                ].sort((a, b) => {
+                  const dateA = a.date + (a.time || '');
+                  const dateB = b.date + (b.time || '');
+                  return dateB.localeCompare(dateA);
+                });
+
+                // Filter by date range
+                let filtered = combinedExpenses;
+                if (dateFrom) filtered = filtered.filter(e => e.date >= dateFrom);
+                if (dateTo) filtered = filtered.filter(e => e.date <= dateTo);
+
+                return (
+              <>
               {/* Expenses List - Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {expenses.length === 0 ? (
+                {filtered.length === 0 ? (
                   <div className="col-span-full py-8 text-center text-slate-500">ยังไม่มีรายการค่าใช้จ่าย</div>
-                ) : expenses.map(exp => (
+                ) : filtered.map(exp => (
                   <div key={exp.id} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50 hover:bg-slate-700/50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <span className="bg-blue-600/30 text-blue-400 px-2 py-1 rounded text-xs">{exp.category}</span>
+                        <span className={`px-2 py-1 rounded text-xs ${exp.type === 'slip' ? 'bg-blue-600/30 text-blue-400' : 'bg-purple-600/30 text-purple-400'}`}>
+                          {exp.type === 'slip' ? 'สลิป' : exp.category}
+                        </span>
                       </div>
                       <p className="text-red-400 font-bold">{formatCurrency(exp.amount)}</p>
                     </div>
-                    <p className="text-white text-sm mb-1">{exp.note || '-'}</p>
+                    <p className="text-white text-sm mb-1">{exp.type === 'slip' ? exp.senderName : (exp.note || '-')}</p>
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-600/50">
                       <p className="text-slate-400 text-xs">{exp.date}</p>
                       <div className="flex gap-1">
-                        <button onClick={() => setEditingExpense(exp)} className="p-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 rounded" title="แก้ไข">
-                          <Pencil size={12}/>
-                        </button>
-                        <button onClick={async () => {
-                          if (!confirm('ยืนยันการลบ?')) return;
-                          await fetch(`/api/expenses/${exp.id}`, { method: 'DELETE' });
-                          fetchData();
-                        }} className="p-1.5 bg-red-600/20 text-red-400 hover:bg-red-600/40 rounded" title="ลบ">
-                          <Trash2 size={12}/>
-                        </button>
+                        {exp.type === 'expense' && (
+                          <>
+                          <button onClick={() => setEditingExpense(expenses.find(e => e.id === exp.id) || null)} className="p-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 rounded" title="แก้ไข">
+                            <Pencil size={12}/>
+                          </button>
+                          <button onClick={async () => {
+                            if (!confirm('ยืนยันการลบ?')) return;
+                            await fetch(`/api/expenses/${exp.id}`, { method: 'DELETE' });
+                            fetchData();
+                          }} className="p-1.5 bg-red-600/20 text-red-400 hover:bg-red-600/40 rounded" title="ลบ">
+                            <Trash2 size={12}/>
+                          </button>
+                          </>
+                        )}
+                        {exp.type === 'slip' && (
+                          <button onClick={() => setSelectedSlip(slips.find(s => s.id === exp.id) || null)} className="p-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 rounded" title="ดูรายละเอียด">
+                            <Eye size={12}/>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
+              </>
+                );
+              })()}
             </div>
           )}
 
