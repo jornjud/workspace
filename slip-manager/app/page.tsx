@@ -120,7 +120,9 @@ export default function Dashboard() {
       const sumData = await sumRes.json();
       setSummary(sumData);
       const data = await slipsRes.json();
-      setSlips(data.slips || []);
+      // กรองเอาเฉพาะ slip จริงๆ (ไม่เอา expense ที่ผิดพลาด)
+      const realSlips = (data.slips || []).filter((s: any) => s.status !== 'expense');
+      setSlips(realSlips);
       const qrmemberData = await qrmemberRes.json();
       setQrmember(qrmemberData);
       const expensesData = await expensesRes.json();
