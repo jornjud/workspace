@@ -126,7 +126,10 @@ export default function Dashboard() {
       const qrmemberData = await qrmemberRes.json();
       setQrmember(qrmemberData);
       const expensesData = await expensesRes.json();
-      const allExpenses = expensesData.expenses || [];
+      // Sort expenses by createdAt descending (newest first)
+      let allExpenses = (expensesData.expenses || []).sort((a: any, b: any) => 
+        (b.createdAt || '').localeCompare(a.createdAt || '')
+      );
       setExpenses(allExpenses);
       // Apply initial filter if date range is set
       filterExpenses(allExpenses, dateFrom, dateTo);
