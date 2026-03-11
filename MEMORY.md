@@ -76,6 +76,27 @@
 
 ---
 
+## 🚨 Security Alert (2026-03-11)
+
+**Malicious npm package `@openclaw-ai/openclawai` ถูกพบ!**
+
+- ปลอมเป็น OpenClaw installer
+- Deploy RAT + ขโมย credentials, crypto wallets, browser data, SSH keys
+- **แพ็กเกจทางการ:** `openclaw` (ไม่ใช่ `@openclaw-ai/openclawai`)
+- **แพลตฟอร์มที่ถูกโจมตี:** macOS (เป้าหลัก)
+
+**ผลตรวจสอบ VPS:**
+- ✅ OpenClaw 2026.3.8 (ปลอดภัย - ใหม่กว่า 2026.3.7)
+- ✅ ไม่พบ `@openclaw-ai/openclawai`
+- ✅ Path: `/home/ple/.npm-global/bin/openclaw`
+
+**IOC:**
+- Package: `@openclaw-ai/openclawai`
+- C2: trackpipe[.]dev
+- Created: 2026-03-03
+
+---
+
 ## 🆕 Recent Updates
 
 - 2026-02-28: **SecondPhone Firestore** - ตั้งค่า Firebase Firestore เสร็จ ตอนนี้ admin สามารถแก้ไข/ลบสินค้าเองได้แล้ว! (https://secondphone.vercel.app/admin)
