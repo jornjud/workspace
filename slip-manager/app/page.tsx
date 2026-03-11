@@ -242,7 +242,7 @@ export default function Dashboard() {
     if (s.bank === 'เงินสด') return false;
     return true;
   });
-  console.log('Slips before filter:', slips.length, 'After:', filteredSlips.length);
+  
   const recentTransactions: CombinedTransaction[] = [
     ...filteredSlips.map(s => ({
       id: s.id,
