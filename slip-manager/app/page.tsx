@@ -85,13 +85,11 @@ export default function Dashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // Real-time refresh every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  // Manual refresh only (disabled auto-refresh to prevent high Firebase reads)
+  // User can click refresh button manually
+  const manualRefresh = () => {
+    fetchData();
+  };
 
   // Filter expenses by date range
   const filterExpenses = (expenseList: typeof expenses, from: string, to: string) => {
@@ -113,10 +111,11 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [sumRes, slipsRes, qrmemberRes, expensesRes] = await Promise.all([
+      // Disabled qrmember API to prevent high Firebase reads (billing issue)
+      // Only fetch summary, slips, and expenses
+      const [sumRes, slipsRes, expensesRes] = await Promise.all([
         fetch('/api/summary'),
         fetch('/api/slips?limit=100'),
-        fetch('/api/qrmember'),
         fetch('/api/expenses')
       ]);
       const sumData = await sumRes.json();
@@ -125,8 +124,8 @@ export default function Dashboard() {
       // กรองเอาเฉพาะ slip จริงๆ (ไม่เอา expense ที่ผิดพลาด)
       const realSlips = (data.slips || []).filter((s: any) => s.status !== 'expense');
       setSlips(realSlips);
-      const qrmemberData = await qrmemberRes.json();
-      setQrmember(qrmemberData);
+      // qrmember API disabled to prevent high Firebase billing
+      // setQrmember remains as-is (shows last data or null)
       const expensesData = await expensesRes.json();
       // Sort expenses by createdAt descending (newest first)
       let allExpenses = (expensesData.expenses || []).sort((a: any, b: any) => 
