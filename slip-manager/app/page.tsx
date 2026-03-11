@@ -31,6 +31,7 @@ interface CombinedTransaction {
   bank?: string;
   senderName?: string;
   status?: string;
+  createdAt?: string;
 }
 
 interface Summary {
@@ -255,7 +256,8 @@ export default function Dashboard() {
       type: 'slip' as const,
       bank: s.bank,
       senderName: s.senderName,
-      status: s.status
+      status: s.status,
+      createdAt: (s as any).createdAt || ''
     })),
     ...expenses.map(e => ({
       id: e.id,
@@ -264,11 +266,12 @@ export default function Dashboard() {
       time: '',
       type: 'expense' as const,
       category: e.category,
-      note: e.note
+      note: e.note,
+      createdAt: (e as any).createdAt || ''
     }))
   ].sort((a, b) => {
-    const dateA = a.date + (a.time || '');
-    const dateB = b.date + (b.time || '');
+    const dateA = a.createdAt || '';
+    const dateB = b.createdAt || '';
     return dateB.localeCompare(dateA);
   }).slice(0, 10);
 

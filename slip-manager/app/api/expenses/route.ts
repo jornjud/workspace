@@ -46,11 +46,9 @@ export const revalidate = 0;
 export async function GET() {
   try {
     const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
-    const q = query(collection(db, 'expenses'), limit(200));
+    const q = query(collection(db, 'expenses'), orderBy('createdAt', 'desc'), limit(200));
     const snapshot = await getDocs(q);
-    let expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    // Sort by createdAt descending (newest first)
-    expenses.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    const expenses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     return NextResponse.json({ expenses });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
