@@ -3,6 +3,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
 interface SlipData {
+  status?: string;
   id: string;
   date?: string;
   amount?: number;
