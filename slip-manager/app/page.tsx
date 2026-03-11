@@ -139,9 +139,18 @@ export default function Dashboard() {
   };
 
   const deleteSlip = async (id: string) => {
-    if (!confirm('ยืนยันการลบ?')) return;
-    await fetch(`/api/slips/${id}`, { method: 'DELETE' });
-    fetchData();
+    // ลบเลยโดยไม่ต้องยืนยัน - กดปุ่มแล้วลบทันที
+    if (!confirm('ลบรายการนี้?')) return;
+    try {
+      const res = await fetch(`/api/slips/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchData();
+      } else {
+        alert('ไม่สามารถลบได้ กรุณาลองใหม่');
+      }
+    } catch (e) {
+      alert('เกิดข้อผิดพลาด');
+    }
   };
 
   // Export to CSV
