@@ -18,6 +18,7 @@ interface Slip {
   reference: string;
   status: 'pending' | 'approved' | 'rejected';
   slipType?: 'income' | 'expense';
+  description?: string; // เพิ่มสำหรับ slip ใหม่ที่บันทึกด้วย description
 }
 
 // Combined transaction for dashboard
@@ -31,6 +32,8 @@ interface CombinedTransaction {
   note?: string;
   bank?: string;
   senderName?: string;
+  receiverName?: string;
+  description?: string;
   status?: string;
   createdAt?: string;
 }
@@ -62,7 +65,7 @@ const BANK_COLORS: Record<string, string> = {
 export default function Dashboard() {
   const [slips, setSlips] = useState<Slip[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
-  const [qrmember, setQrmember] = useState<{totalSales: number, todaySales: number, monthSales: number, monthCount: number, todayCount: number} | null>(null);
+  const [qrmember, setQrmember] = useState<{totalSales: number, todaySales: number, monthSales: number, monthCount: number, todayCount: number} | null>(null); // Disabled - ใช้ Firestore มีค่าใช้จ่าย
   const [expenses, setExpenses] = useState<{id: string, amount: number, category: string, note: string, date: string}[]>([]);
   const [editingExpense, setEditingExpense] = useState<{id: string, amount: number, category: string, note: string, date: string} | null>(null);
   const [dateFrom, setDateFrom] = useState('');
@@ -256,6 +259,8 @@ export default function Dashboard() {
       type: 'slip' as const,
       bank: s.bank,
       senderName: s.senderName,
+      receiverName: s.receiverName, // เพิ่ม
+      description: s.description,
       status: s.status,
       createdAt: (s as any).createdAt || ''
     })),
@@ -347,8 +352,8 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-green-400 text-sm font-medium">💰 รายได้ (QRMember)</p>
-                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
-                      <p className="text-slate-500 text-xs mt-1">เดือนนี้</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">-</p>
+                      <p className="text-slate-500 text-xs mt-1">ปิดใช้งาน (มีค่าใช้จ่าย)</p>
                     </div>
                     <DollarSign className="text-green-400" size={32}/>
                   </div>
@@ -367,8 +372,8 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-blue-400 text-sm font-medium">📊 กำไร/ขาดทุน</p>
-                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">{(qrmember?.monthSales || 0) - (summary?.monthSlipAmount || 0) - (summary?.monthExpenses || 0) >= 0 ? '' : '-'}{formatCurrency(Math.abs((qrmember?.monthSales || 0) - (summary?.monthSlipAmount || 0) - (summary?.monthExpenses || 0)))}</p>
-                      <p className="text-slate-500 text-xs mt-1">เดือนนี้</p>
+                      <p className="text-2xl md:text-3xl font-bold text-white mt-1">-</p>
+                      <p className="text-slate-500 text-xs mt-1">-</p>
                     </div>
                     <Calendar className="text-blue-400" size={32}/>
                   </div>
@@ -391,8 +396,8 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-400 text-sm font-medium">ยอดขายวันนี้</p>
-                      <p className="text-xl md:text-2xl font-bold text-green-400 mt-1">{qrmember?.todaySales != null ? formatCurrency(qrmember.todaySales) : '-'}</p>
-                      <p className="text-slate-500 text-xs">{qrmember?.todaySales || 0} บาท</p>
+                      <p className="text-xl md:text-2xl font-bold text-green-400 mt-1">-</p>
+                      <p className="text-slate-500 text-xs">-</p>
                     </div>
                     <DollarSign className="text-green-400" size={24}/>
                   </div>
@@ -411,7 +416,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-400 text-sm font-medium">กำไรวันนี้</p>
-                      <p className="text-xl md:text-2xl font-bold text-blue-400 mt-1">{formatCurrency((qrmember?.todaySales || 0) - (summary?.todayCosts || 0))}</p>
+                      <p className="text-xl md:text-2xl font-bold text-blue-400 mt-1">-</p>
                     </div>
                     <Calendar className="text-blue-400" size={24}/>
                   </div>
@@ -420,8 +425,8 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-400 text-sm font-medium">ยอดขายเดือนนี้</p>
-                      <p className="text-xl md:text-2xl font-bold text-purple-400 mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
-                      <p className="text-slate-500 text-xs">{qrmember?.monthCount || 0} รายการ</p>
+                      <p className="text-xl md:text-2xl font-bold text-purple-400 mt-1">-</p>
+                      <p className="text-slate-500 text-xs">-</p>
                     </div>
                     <Building2 className="text-purple-400" size={24}/>
                   </div>
@@ -518,8 +523,8 @@ export default function Dashboard() {
                           <td className="py-3 px-2 text-sm">
                             {item.type === 'slip' ? (
                               <>
-                                <span className="block">{item.bank}</span>
-                                <span className="text-slate-400 text-xs">{item.senderName}</span>
+                                <span className="block font-medium">{(item as any).receiverName || item.senderName || item.description || '-'}</span>
+                                <span className="text-slate-400 text-xs">{item.bank || 'โอนเงิน'}</span>
                               </>
                             ) : (
                               <>
@@ -841,10 +846,10 @@ export default function Dashboard() {
                     ['รายงานประจำเดือน'],
                     [''],
                     ['หัวข้อ', 'จำนวน', 'หมายเหตุ'],
-                    ['รายได้ (QRMember)', qrmember?.monthSales || 0, 'ยอดขายเดือนนี้'],
+                    ['รายได้ (QRMember)', '-', 'ปิดใช้งาน'],
                     ['ค่าใช้จ่าย (สลิป)', summary?.monthSlipAmount || 0, 'ค่าใช้จ่ายจากสลิป'],
                     ['ค่าใช้จ่าย (อื่น)', summary?.monthExpenses || 0, 'ค่าใช้จ่ายที่บันทึก'],
-                    ['กำไร/ขาดทุน', (qrmember?.monthSales || 0) - (summary?.monthCosts || 0), ''],
+                    ['กำไร/ขาดทุน', '-', ''],
                     [''],
                     ['รายละเอียดรายได้'],
                     ['วันที่', 'ผู้รับ', 'จำนวน', 'ธนาคาร'],
@@ -867,8 +872,8 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-green-900/30 rounded-lg p-4 border border-green-700/30">
                     <p className="text-green-400 text-sm">💰 รายได้ (QRMember)</p>
-                    <p className="text-2xl font-bold text-white mt-1">{qrmember?.monthSales != null ? formatCurrency(qrmember.monthSales) : '-'}</p>
-                    <p className="text-slate-400 text-xs">{qrmember?.monthCount || 0} รายการ</p>
+                    <p className="text-2xl font-bold text-white mt-1">-</p>
+                    <p className="text-slate-400 text-xs">ปิดใช้งาน</p>
                   </div>
                   <div className="bg-red-900/30 rounded-lg p-4 border border-red-700/30">
                     <p className="text-red-400 text-sm">📤 ค่าใช้จ่าย (สลิป)</p>
@@ -883,9 +888,7 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-4 bg-blue-900/30 rounded-lg p-4 border border-blue-700/30">
                   <p className="text-blue-400 text-sm font-semibold">📊 กำไร/ขาดทุน สุทธิ</p>
-                  <p className={`text-3xl font-bold mt-1 ${((qrmember?.monthSales || 0) - (summary?.monthCosts || 0)) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {formatCurrency((qrmember?.monthSales || 0) - (summary?.monthCosts || 0))}
-                  </p>
+                  <p className="text-3xl font-bold mt-1 text-slate-400">-</p>
                 </div>
               </div>
 

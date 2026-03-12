@@ -18,15 +18,17 @@ interface ExpenseData {
 
 export async function GET() {
   try {
+    // ใช้ timezone Thailand (UTC+7)
     const now = new Date();
-    const today = now.toISOString().split('T')[0]; // "2026-03-10"
+    const bangkokTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+    const today = bangkokTime.toISOString().split('T')[0]; // "2026-03-12" (Thailand time)
 
     // Get all slips
     const allSnap = await getDocs(collection(db, 'slips'));
     const allSlips: SlipData[] = allSnap.docs
     .map(d => ({ id: d.id, ...d.data() } as SlipData))
-    // กรองเอาเฉพาะ slip จริงๆ (ไม่เอา expense)
-    .filter(s => s.status !== 'expense' && s.bank !== 'เงินสด');
+    // กรองเอาเฉพาะ slip จริงๆ (ไม่เอา expense และ เงินสด)
+    .filter(s => s.status !== 'expense' && s.bank !== 'เงินสด' && s.bank !== null && s.bank !== undefined);
 
     // Get all expenses
     const expensesSnap = await getDocs(collection(db, 'expenses'));

@@ -11,25 +11,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'No image provided' }, { status: 400 });
     }
 
-    const slipData = {
-      amount: 0,
+    // บันทึกเป็น "ค่าใช้จ่าย" แทนสลิป
+    const expenseData = {
+      amount: 0, // ต้องแก้ไขหลัง OCR
+      category: 'สลิป/ใบเสร็จ',
+      note: 'รอวิเคราะห์',
       date: new Date().toISOString().split('T')[0],
-      time: new Date().toTimeString().split(' ')[0].substring(0, 5),
-      bank: 'ธนาคารออมสิน',
       senderName: 'นาย ขจร ตรียุทธ',
-      receiverName: 'รอวิเคราะห์',
       reference: `AUTO-${Date.now()}`,
-      status: 'pending',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
-    const docRef = await addDoc(collection(db, 'slips'), slipData);
+    const docRef = await addDoc(collection(db, 'expenses'), expenseData);
     
     return NextResponse.json({ 
       success: true, 
       id: docRef.id,
-      message: 'Slip uploaded. Please verify and update details.' 
+      message: 'บันทึกเป็นค่าใช้จ่ายแล้ว! กรุณาแก้ไขจำนวนเงิน' 
     });
   } catch (error: any) {
     console.error('OCR Error:', error);
